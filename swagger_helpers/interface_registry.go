@@ -23,10 +23,8 @@ func NewInterfaceRegistry() InterfaceRegistry {
 // module
 func (r *InterfaceRegistry) RegisterInterface(module, name string) {
 	interfaces, known := r.interfacesByModule[module]
-
 	if !known {
 		interfaces = mapset.NewSet()
-	} else {
 	}
 	interfaces.Add(name)
 

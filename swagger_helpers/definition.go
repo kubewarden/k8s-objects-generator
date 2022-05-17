@@ -21,9 +21,6 @@ type Definition struct {
 	// **after** the split is done
 	TypeName string
 
-	// original ID
-	originalID string
-
 	// list of package names this definition depends on
 	// For example, if a definition has a `meta` property of type
 	// `apimachinery/pkg/apis/meta/v1/ObjectMeta`, then this definition depends
