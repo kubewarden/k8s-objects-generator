@@ -1,0 +1,78 @@
+{{- if and .IsBaseType .IsExported (not .IsSuperAlias) }}
+  {{- template "schemaPolymorphic" . }}
+{{- else if .IsSuperAlias }}
+  type {{ pascalize .Name }} {{ template "typeSchemaType" . }}{{/* For types declared as $ref on some other type, just declare the type as a golang _aliased_ type, e.g. type A = B. No method shall be redeclared.  */}}
+  {{- if .IsBaseType }}
+    {{ template "baseTypeSerializer" . }}{{/* When the alias redeclares a polymorphic type, define factory methods with this alias. */}}
+  {{- end }}
+{{- else if .IsEmbedded }}
+  {{- template "schemaEmbedded" . }}
+{{- else }}
+  {{- if or .IsComplexObject .IsTuple .IsAdditionalProperties }}{{/* TODO(fred): handle case of subtype inheriting from base type with AdditionalProperties, issue #2220 */}}
+      {{ if .Name }}type {{ if not .IsExported }}{{ .Name }}{{ else }}{{ pascalize .Name }}{{ end }}{{ end }} {{ template "schemaBody" . }}
+    {{- range .Properties }}
+      {{- if .IsBaseType }}
+        // {{ pascalize .Name}} gets the {{ humanize .Name }} of this base type{{/* all properties which are of a base type propagate its interface */}}
+        func ({{ $.ReceiverName}} *{{ pascalize $.Name}}) {{ pascalize .Name}}() {{ template "schemaType" . }}{
+          {{- if eq $.DiscriminatorField .Name }}
+            return {{ printf "%q" $.DiscriminatorValue }}
+          {{- else }}
+            return {{ $.ReceiverName }}.{{camelize .Name}}Field
+          {{- end }}
+        }
+
+        // Set{{ pascalize .Name}} sets the {{ humanize .Name }} of this base type
+        func ({{ $.ReceiverName}} *{{ pascalize $.Name}}) Set{{ pascalize .Name}}(val {{ template "schemaType" . }}) {
+          {{- if ne $.DiscriminatorField .Name }}
+            {{ $.ReceiverName }}.{{camelize .Name}}Field = val
+          {{- end }}
+        }
+      {{- end }}
+    {{- end }}
+    {{- if .Default }}{{/* TODO(fred) - issue #2189 */}}
+      func ({{.ReceiverName}} *{{ pascalize .Name }}) UnmarshalJSON(b []byte) error {
+        type {{ pascalize .Name }}Alias {{ pascalize .Name }}
+        var t {{ pascalize .Name }}Alias
+        if err := json.Unmarshal([]byte({{printf "%q" (json .Default)}}), &t); err != nil {
+          return err
+        }
+        if err := json.Unmarshal(b, &t); err != nil {
+          return err
+        }
+        *{{.ReceiverName}} = {{ pascalize .Name }}(t)
+        return nil
+      }
+    {{- end }}
+  {{- else }}
+    type {{ pascalize .Name }} {{ template "typeSchemaType" . }}
+  {{- end }}
+  {{- if (and .IsPrimitive .IsAliased .IsCustomFormatter (not (stringContains .Zero "(\""))) }}
+    {{ template "aliasedSerializer" . }}
+  {{- end }}
+  {{- if .IsSubType }}
+    {{ range .AllOf }}
+      {{ range .Properties }}
+        {{- if .IsBaseType }}
+
+        // {{ pascalize .Name}} gets the {{ humanize .Name }} of this subtype
+        func ({{$.ReceiverName}} *{{ pascalize $.Name}}) {{ pascalize .Name}}() {{ template "schemaType" . }}{
+          {{- if eq $.DiscriminatorField .Name }}
+            return {{ printf "%q" $.DiscriminatorValue }}
+          {{- else }}
+            return {{ $.ReceiverName }}.{{camelize .Name}}Field
+          {{- end }}
+        }
+
+        // Set{{ pascalize .Name}} sets the {{ humanize .Name }} of this subtype
+        func ({{$.ReceiverName}} *{{ pascalize $.Name}}) Set{{ pascalize .Name}}(val {{ template "schemaType" . }}) {
+          {{- if ne $.DiscriminatorField .Name }}
+            {{ $.ReceiverName }}.{{camelize .Name}}Field = val
+          {{- end }}
+        }
+        {{- end }}
+      {{- end }}{{/* TODO(fred): handle AdditionalProperties in base type */}}
+    {{- end }}
+    {{ template "mapOrSliceGetter" . }}
+  {{- end }}
+  {{ template "schemaSerializer" . }}
+{{- end }}
