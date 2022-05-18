@@ -4,7 +4,7 @@ The purpose of this tool is to process the OpenAPI file provided by Kubernetes
 and generate models for all the types defined inside of it.
 
 The Go models created by this project are compatible with
-[TinyGo](tinygo.org/)
+[TinyGo](https://tinygo.org/)
 and can be serialized and deserialized using the JSON format.
 
 > **Note:** this tool is useless for regular users of Kubewarden. If you just
