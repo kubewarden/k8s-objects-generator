@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"log"
 	"os"
@@ -9,18 +10,45 @@ import (
 	"github.com/kubewarden/k8s-objects-generator/split"
 )
 
-func main() {
-	var swaggerFile, outputDir, gitRepo string
+//go:embed LICENSE
+var LICENSE string
 
-	flag.StringVar(&swaggerFile, "f", "swagger.json", "The swagger file to process")
+func main() {
+	var swaggerFile, kubeVersion, outputDir, gitRepo string
+	var swaggerData *SwaggerData
+	var err error
+
+	flag.StringVar(&swaggerFile, "f", "", "The swagger file to process")
+	flag.StringVar(&kubeVersion, "kube-version", "", "Fetch the swagger file of the specified Kubernetes version")
 	flag.StringVar(&outputDir, "o", "./k8s-objects", "The root directory where the files will be generated")
 	flag.StringVar(&gitRepo, "repo", "github.com/kubewarden/k8s-objects", "The repository where the generated files are going to be published")
 
 	flag.Parse()
 
-	outputDir, err := filepath.Abs(outputDir)
+	if swaggerFile != "" && kubeVersion != "" {
+		log.Fatal("`-f` and `-kube-version` flags cannot be used at the same time")
+	}
+
+	if kubeVersion != "" {
+		swaggerData, err = DownloadSwagger(kubeVersion)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	if swaggerFile != "" {
+		data, err := os.ReadFile(swaggerFile)
+		if err != nil {
+			log.Fatalf("cannot read swagger file %s: %v", swaggerFile, err)
+		}
+		swaggerData = &SwaggerData{
+			Data:              data,
+			KubernetesVersion: "unknown",
+		}
+	}
+
+	outputDir, err = filepath.Abs(outputDir)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	templatesTmpDir, err := os.MkdirTemp("", "k8s-objects-generator-swagger-templates")
@@ -50,19 +78,19 @@ func main() {
 	}
 
 	log.Print("Initializing target directory")
-	err = project.Init()
+	err = project.Init(swaggerData.Data, swaggerData.KubernetesVersion, LICENSE)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	splitter, err := split.NewSplitter(swaggerFile)
+	splitter, err := split.NewSplitter(project.SwaggerFile())
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	refactoringPlan, err := splitter.ComputeRefactoringPlan()
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	if err := splitter.GenerateSwaggerFiles(project, refactoringPlan); err != nil {

@@ -37,7 +37,7 @@ func NewProject(outputDir, gitRepo, swaggerTemplatesDir string) (Project, error)
 	}, nil
 }
 
-func (p *Project) Init() error {
+func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) error {
 	err := os.RemoveAll(p.Root)
 	if err != nil && !os.IsNotExist(err) {
 		return errors.Wrapf(err, "cannot cleanup dir %s", p.Root)
@@ -53,7 +53,28 @@ func (p *Project) Init() error {
 	}
 	log.Printf("Created `go.mod` under %s", goModFileName)
 
+	swaggerFileName := p.SwaggerFile()
+	if err := os.WriteFile(swaggerFileName, swaggerData, 0644); err != nil {
+		return errors.Wrapf(err, "cannot write swagger file inside of project root: %s", swaggerFileName)
+	}
+
+	kubernetesVersionFile := filepath.Join(p.Root, "KUBERNETES_VERSION")
+	err = os.WriteFile(kubernetesVersionFile, []byte(kubernetesVersion), 0644)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write KUBERNETES_VERSION file %s", kubernetesVersionFile)
+	}
+
+	licenseFile := filepath.Join(p.Root, "LICENSE")
+	err = os.WriteFile(licenseFile, []byte(license), 0644)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
+	}
+
 	return nil
+}
+
+func (p *Project) SwaggerFile() string {
+	return filepath.Join(p.Root, "swagger.json")
 }
 
 const GO_MOD_TEMPLATE = `
