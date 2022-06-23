@@ -23,6 +23,6 @@ do
   cp -r $OUT_DIR/src/github.com/kubewarden/k8s-objects/* $GIT_DIR
   git add *
   git commit -a -m "initial release"
-  git tag v1.$KUBEMINOR.0+kw1
+  git tag v1.$KUBEMINOR.0-kw1
   cd -
 done
