@@ -82,7 +82,7 @@ module {{ .Repository }}
 
 go 1.17
 
-replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.0
+replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.1
 `
 
 func goModInit(fileName, gitRepo string) error {
@@ -217,6 +217,10 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 }
 
 func (p *Project) RunEasyJson(targets []string) error {
+	if len(targets) == 0 {
+		return nil
+	}
+
 	cmdName := "easyjson"
 	args := []string{"-all"}
 	args = append(args, targets...)
