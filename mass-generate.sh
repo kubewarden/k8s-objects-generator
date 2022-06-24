@@ -17,12 +17,23 @@ do
   echo ==================================
 
   ./k8s-objects-generator -kube-version 1.$KUBEMINOR -o $OUT_DIR
+
+  BRANCH=release-1.$KUBEMINOR
+
   cd $GIT_DIR
-  git checkout --orphan release-1.$KUBEMINOR
+  if [ $((n=$(git branch | grep -wic "$BRANCH"))) -ge 0 ]; then
+    git checkout $BRANCH
+    GIT_COMMIT_MSG="Update definitions"
+    GIT_TAG="v1.$KUBEMINOR.0-kw$((n+1))"
+  else
+    git checkout --orphan $BRANCH
+    GIT_COMMIT_MSG="initial release"
+    GIT_TAG="v1.$KUBEMINOR.0-kw1"
+  fi
   git reset --hard
   cp -r $OUT_DIR/src/github.com/kubewarden/k8s-objects/* $GIT_DIR
   git add *
-  git commit -a -m "initial release"
-  git tag v1.$KUBEMINOR.0-kw1
+  git commit -m "$GIT_COMMIT_MSG"
+  git tag $GIT_TAG
   cd -
 done
