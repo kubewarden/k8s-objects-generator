@@ -174,7 +174,10 @@ func patchSchemaRef(schema *openapi_spec.Schema,
 		// non-required properties have `json:"omitempty"` set
 		schema.VendorExtensible.AddExtension("x-omitempty", true)
 
-		isBasicType := schema.SchemaProps.Ref.GetPointer() != nil && !schema.SchemaProps.Ref.GetPointer().IsEmpty()
+		isBasicType := true
+		if schema.SchemaProps.Ref.GetPointer() != nil && !schema.SchemaProps.Ref.GetPointer().IsEmpty() {
+			isBasicType = false
+		}
 
 		if !isBasicType && !isInterface {
 			// in addition to that, non-required objects must be set to nullable
