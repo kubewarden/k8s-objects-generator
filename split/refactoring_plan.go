@@ -32,8 +32,7 @@ func NewRefactoringPlan(swagger *openapi_spec.Swagger) (*RefactoringPlan, error)
 			return nil, errors.Wrapf(err, "cannot parse definition with id %s", id)
 		}
 
-		if len(definition.Type) == 1 &&
-			definition.Type[0] == "object" &&
+		if ((len(definition.Type) == 1 && definition.Type[0] == "object") || (len(definition.Type) == 0)) &&
 			len(definition.Properties) == 0 &&
 			definition.AdditionalProperties == nil {
 

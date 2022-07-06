@@ -285,6 +285,13 @@ func TestPatchSchema(t *testing.T) {
 		},
 	}
 
+	properties["required_prop"] = openapi_spec.Schema{
+		SchemaProps: openapi_spec.SchemaProps{
+			Description: "required prop desc",
+			Ref:         refSamePackage,
+		},
+	}
+
 	refInterfaceFromOtherPackage, err := openapi_spec.NewRef(
 		"#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Raw")
 	if err != nil {
@@ -298,9 +305,24 @@ func TestPatchSchema(t *testing.T) {
 	}
 	interfaces.RegisterInterface("apimachinery/pkg/apis/meta/v1", "Raw")
 
+	properties["array_of_strings"] = openapi_spec.Schema{
+		SchemaProps: openapi_spec.SchemaProps{
+			Description: "a list of strings",
+			Type:        []string{"array"},
+			Items: &openapi_spec.SchemaOrArray{
+				Schema: &openapi_spec.Schema{
+					SchemaProps: openapi_spec.SchemaProps{
+						Type: []string{"string"},
+					},
+				},
+			},
+		},
+	}
+
 	defSchema := openapi_spec.Schema{
 		SchemaProps: openapi_spec.SchemaProps{
 			Properties: properties,
+			Required:   []string{"required_prop"},
 		},
 	}
 
@@ -320,60 +342,118 @@ func TestPatchSchema(t *testing.T) {
 
 	patchedProperties := patchedSchema.Properties
 
-	// outside property should not be a ref anymore, it should
-	// instead be a x-go-type
-	outsideProp, found := patchedProperties["outside"]
-	if !found {
-		t.Errorf("cannot find outside prop")
-	}
-	extensions := outsideProp.VendorExtensible.Extensions
-	_, found = extensions["x-go-type"]
-	if !found {
-		t.Errorf("cannot find x-go-type for outside prop")
-	}
-	if !outsideProp.SchemaProps.Ref.GetPointer().IsEmpty() {
-		t.Errorf("outside prop should not have a Ref anymore")
+	cases := []struct {
+		PropName       string
+		XGoTypeIsSet   bool
+		RefIsNull      bool
+		NewRef         string
+		IsNullableSet  bool
+		IsOmitEmptySet bool
+	}{
+		{
+			PropName:       "outside",
+			XGoTypeIsSet:   true,
+			RefIsNull:      true,
+			NewRef:         "",
+			IsNullableSet:  true,
+			IsOmitEmptySet: true,
+		},
+		{
+			PropName:       "same",
+			XGoTypeIsSet:   false,
+			RefIsNull:      false,
+			NewRef:         "/definitions/MutatingWebhookSpec",
+			IsNullableSet:  true,
+			IsOmitEmptySet: true,
+		},
+		{
+			PropName:       "interface",
+			XGoTypeIsSet:   true,
+			RefIsNull:      true,
+			NewRef:         "",
+			IsNullableSet:  false,
+			IsOmitEmptySet: true,
+		},
+		{
+			PropName:       "array_of_strings",
+			XGoTypeIsSet:   false,
+			RefIsNull:      true,
+			NewRef:         "",
+			IsNullableSet:  false,
+			IsOmitEmptySet: true,
+		},
+		{
+			PropName:       "required_prop",
+			XGoTypeIsSet:   false,
+			RefIsNull:      false,
+			NewRef:         "/definitions/MutatingWebhookSpec",
+			IsNullableSet:  false,
+			IsOmitEmptySet: false,
+		},
 	}
 
-	// Ref inside of the same package should still be a ref, but
-	// pointing to the new internal address
-	internalProp, found := patchedProperties["same"]
-	if !found {
-		t.Errorf("cannot find internal prop")
-	}
-	extensions = internalProp.VendorExtensible.Extensions
-	_, found = extensions["x-go-type"]
-	if found {
-		t.Errorf("internal prop should NOT have x-go-type")
-	}
-	internalRef := internalProp.SchemaProps.Ref.GetPointer()
-	if internalRef.IsEmpty() {
-		t.Errorf("internal prop should not have a Ref")
-	}
-	if internalRef.String() != "/definitions/MutatingWebhookSpec" {
-		t.Errorf("internal prop Ref is pointing to the wrong location: %s", internalRef.String())
-	}
+	for _, testCase := range cases {
+		prop, found := patchedProperties[testCase.PropName]
+		if !found {
+			t.Errorf("cannot find %s property", testCase.PropName)
+			continue
+		}
+		extensions := prop.VendorExtensible.Extensions
+		_, found = extensions["x-go-type"]
+		if testCase.XGoTypeIsSet && !found {
+			t.Errorf("x-go-type is not set for %s property", testCase.PropName)
+		}
+		if !testCase.XGoTypeIsSet && found {
+			t.Errorf("x-go-type is was not supposed to be set for %s property", testCase.PropName)
+		}
 
-	// Ref to an external Interface type should be replaced with
-	// a x-go-type and a x-nullable
-	// The Ref should also be empty
-	interfaceProp, found := patchedProperties["interface"]
+		ref := prop.SchemaProps.Ref.GetPointer()
+		refIsNull := ref.IsEmpty()
+		if testCase.RefIsNull && !refIsNull {
+			t.Errorf("%s property should not have a ref set anymore", testCase.PropName)
+		}
+		if !testCase.RefIsNull && refIsNull {
+			t.Errorf("%s property should have a ref set", testCase.PropName)
+		}
+
+		if testCase.NewRef != "" {
+			if ref.String() != testCase.NewRef {
+				t.Errorf("%s property: Ref is pointing to the wrong location: %s instead of %s",
+					testCase.PropName,
+					ref.String(),
+					testCase.NewRef,
+				)
+			}
+		}
+
+		checkBoolExtension(
+			t,
+			testCase.PropName,
+			extensions,
+			"x-nullable",
+			testCase.IsNullableSet)
+
+		checkBoolExtension(
+			t,
+			testCase.PropName,
+			extensions,
+			"x-omitempty",
+			testCase.IsOmitEmptySet)
+	}
+}
+
+func checkBoolExtension(t *testing.T, propName string, extensions openapi_spec.Extensions, extensionName string, expectedValue bool) {
+	value, found := extensions[extensionName]
+	if !found && expectedValue == false {
+		return
+	}
 	if !found {
-		t.Errorf("cannot find interface prop")
+		t.Errorf("property %s does not have %s extension set",
+			propName, extensionName)
+		return
 	}
-	extensions = interfaceProp.VendorExtensible.Extensions
-	_, found = extensions["x-go-type"]
-	if !found {
-		t.Errorf("cannot find x-go-type for interface prop")
-	}
-	nullable, found := extensions["x-nullable"]
-	if !found {
-		t.Errorf("cannot find x-nullable for interface prop")
-	}
-	if nullable.(bool) != false {
-		t.Errorf("interface prop, x-nullable is not set to `false`: %v", nullable)
-	}
-	if !interfaceProp.SchemaProps.Ref.GetPointer().IsEmpty() {
-		t.Errorf("interface prop should not have a Ref anymore")
+	if value != expectedValue {
+		t.Errorf("property %s: %s extension is not %v as expected",
+			propName, extensionName, expectedValue)
 	}
 }
