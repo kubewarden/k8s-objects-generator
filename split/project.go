@@ -3,7 +3,6 @@ package split
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -125,7 +124,7 @@ func (p *Project) PrepareEasyjsonEnv() error {
 	}
 
 	bootstrapFile := filepath.Join(bootstrapDir, "bottle.go")
-	if err := ioutil.WriteFile(bootstrapFile, []byte(EASYJSON_BOOTSTRAP_FILE_CONTENTS), 0644); err != nil {
+	if err := os.WriteFile(bootstrapFile, []byte(EASYJSON_BOOTSTRAP_FILE_CONTENTS), 0644); err != nil {
 		return fmt.Errorf("Cannot create easyjson bootstrap file: %v", err)
 	}
 
@@ -196,19 +195,28 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 	moduleName := packageNameChunks[len(packageNameChunks)-1]
 	swaggerFileName := filepath.Join(targetDir, moduleName, "swagger.json")
 
+	abbrs := []string{"HPA", "AWS", "CSI", "FS", "FC", "GCE", "GRPC", "ISCSI", "NFS", "OS", "RBD", "SE", "IO", "CIDR"}
+
 	args := []string{
 		"generate",
 		"model",
-		"--template-dir",
-		p.SwaggerTemplatesDir,
-		"--allow-template-override",
-		"-f",
-		swaggerFileName,
-		"-t",
-		targetDir,
-		"-m",
-		moduleName,
 	}
+	for _, abbr := range abbrs {
+		args = append(args, "--additional-initialism="+abbr)
+	}
+
+	args = append(args,
+		[]string{
+			"--template-dir",
+			p.SwaggerTemplatesDir,
+			"--allow-template-override",
+			"-f",
+			swaggerFileName,
+			"-t",
+			targetDir,
+			"-m",
+			moduleName,
+		}...)
 
 	extraEnv := make(map[string]string)
 	extraEnv["GOPATH"] = p.OutputDir

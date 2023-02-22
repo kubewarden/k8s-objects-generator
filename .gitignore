@@ -1,2 +1,6 @@
+# IDE directories
+.vscode/
+.idea/
+
 k8s-objects-generator
 swagger.json
