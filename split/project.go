@@ -2,6 +2,7 @@ package split
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,9 @@ import (
 
 	"github.com/pkg/errors"
 )
+
+//go:embed .gitignore.tmpl
+var gitignore string
 
 type Project struct {
 	OutputDir           string
@@ -67,6 +71,12 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 	err = os.WriteFile(licenseFile, []byte(license), 0644)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
+	}
+
+	gitignoreFile := filepath.Join(p.Root, ".gitignore")
+	err = os.WriteFile(gitignoreFile, []byte(gitignore), 0644)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write .gitignore file %s", licenseFile)
 	}
 
 	return nil
