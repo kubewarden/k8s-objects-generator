@@ -69,6 +69,7 @@ do
   git reset --hard
   git clean -fd
   rsync -av --exclude '.git' --delete-after "$OUT_DIR"/src/github.com/kubewarden/k8s-objects/ "$GIT_DIR"
+  golangci-lint run ./...
   git add -- *
   git commit -F "$GIT_COMMIT_MSG_FILE"
   git tag -s -a -m "$GIT_TAG"  $GIT_TAG
