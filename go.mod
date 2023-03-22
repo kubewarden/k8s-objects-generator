@@ -6,7 +6,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/deckarep/golang-set v1.8.0
 	github.com/go-openapi/spec v0.20.6
-	github.com/heimdalr/dag v1.1.1
+	github.com/heimdalr/dag v1.2.1
 	github.com/pkg/errors v0.9.1
 )
 
