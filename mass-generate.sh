@@ -53,10 +53,11 @@ do
 
   BRANCH=release-1.$KUBEMINOR
 
-  cd $GIT_DIR
-  if [ $((n=$(git branch | grep -wic "$BRANCH"))) -gt 0 ]; then
+  cd "$GIT_DIR"
+  git fetch origin
+
+  if [ $((n=$(git branch -r | grep -wic "$BRANCH"))) -gt 0 ]; then
     git checkout $BRANCH
-    git fetch
     git rebase origin/$BRANCH $BRANCH
 
     n=$(git tag | grep -wic "v1.$KUBEMINOR")
@@ -66,9 +67,8 @@ do
     git checkout --orphan $BRANCH
     GIT_TAG="v1.$KUBEMINOR.0-kw1"
   fi
-  git reset --hard
-  git clean -fd
-  cp -r $OUT_DIR/src/github.com/kubewarden/k8s-objects/* $GIT_DIR
+  rsync -av --exclude '.git' --delete-after "$OUT_DIR"/src/github.com/kubewarden/k8s-objects/ "$GIT_DIR"
+  golangci-lint run ./...
   git add -- *
   git commit -F "$GIT_COMMIT_MSG_FILE"
   git tag -s -a -m "$GIT_TAG"  $GIT_TAG
