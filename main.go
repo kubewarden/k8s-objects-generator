@@ -100,4 +100,8 @@ func main() {
 	if err := split.GenerateEasyjsonFiles(project, refactoringPlan); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := split.GenerateGroupResources(project, refactoringPlan); err != nil {
+		log.Fatal(err)
+	}
 }
