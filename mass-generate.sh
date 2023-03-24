@@ -47,6 +47,7 @@ if [ -z "$GIT_COMMIT_MSG_FILE" ]; then
   exit 1
 fi
 
+make build
 for KUBEMINOR in $(eval "echo {$KUBERNETES_VERSION_MIN..$KUBERNETES_VERSION_MAX}");
 do
   echo ==================================
