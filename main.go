@@ -31,6 +31,10 @@ func main() {
 		log.Fatal("`-f` and `-kube-version` flags cannot be used at the same time")
 	}
 
+	if len(swaggerFile) == 0 && len(kubeVersion) == 0 {
+		log.Fatal("one of the `-f` or `-kube-version` flag must be specified")
+	}
+
 	if kubeVersion != "" {
 		swaggerData, err = DownloadSwagger(kubeVersion)
 		if err != nil {
@@ -61,7 +65,7 @@ func main() {
 	if err = writeTemplates(templatesTmpDir); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("crated templates at %s", templatesTmpDir)
+	log.Printf("Created templates at %s", templatesTmpDir)
 
 	defer func() {
 		if err := os.RemoveAll(templatesTmpDir); err != nil {
