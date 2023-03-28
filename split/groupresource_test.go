@@ -72,7 +72,7 @@ func TestGenerateGroupResources(t *testing.T) {
 	project, err := NewProject(outputDir, "", "")
 	assert.NoError(t, err)
 
-	splitter, err := NewSplitter(filepath.Join("testdata", "swagger.json"))
+	splitter, err := NewSplitter(filepath.Join("testdata", "test-swagger.json"))
 	assert.NoError(t, err)
 
 	refactoringPlan, err := splitter.ComputeRefactoringPlan()
