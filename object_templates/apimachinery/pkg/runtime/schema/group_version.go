@@ -1,3 +1,4 @@
+// Original file location https://raw.githubusercontent.com/kubernetes/apimachinery/master/pkg/runtime/schema/group_version.go
 /*
 Copyright 2015 The Kubernetes Authors.
 

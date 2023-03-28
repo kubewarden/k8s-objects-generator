@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/afero"
+
 	"github.com/kubewarden/k8s-objects-generator/split"
 )
 
@@ -101,7 +103,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := split.GenerateGroupResources(project, refactoringPlan); err != nil {
+	groupResource := split.NewGroupResource(afero.NewOsFs())
+	if err := groupResource.Generate(project, refactoringPlan); err != nil {
 		log.Fatal(err)
 	}
 }

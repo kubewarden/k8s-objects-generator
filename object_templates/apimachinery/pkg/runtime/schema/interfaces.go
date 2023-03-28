@@ -1,3 +1,4 @@
+// Original file location https://raw.githubusercontent.com/kubernetes/apimachinery/master/pkg/runtime/schema/interfaces.go
 /*
 Copyright 2016 The Kubernetes Authors.
 
