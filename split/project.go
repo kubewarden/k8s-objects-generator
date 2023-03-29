@@ -2,7 +2,6 @@ package split
 
 import (
 	"bytes"
-	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -12,10 +11,9 @@ import (
 	"text/template"
 
 	"github.com/pkg/errors"
-)
 
-//go:embed .gitignore.tmpl
-var gitignore string
+	"github.com/kubewarden/k8s-objects-generator/object_templates"
+)
 
 type Project struct {
 	OutputDir           string
@@ -46,7 +44,7 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 		return errors.Wrapf(err, "cannot cleanup dir %s", p.Root)
 	}
 
-	if err = os.MkdirAll(p.Root, 0777); err != nil {
+	if err = os.MkdirAll(p.Root, os.ModePerm); err != nil {
 		return errors.Wrapf(err, "cannot create dir %s", p.Root)
 	}
 
@@ -74,7 +72,7 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 	}
 
 	gitignoreFile := filepath.Join(p.Root, ".gitignore")
-	err = os.WriteFile(gitignoreFile, []byte(gitignore), 0644)
+	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0644)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write .gitignore file %s", licenseFile)
 	}
@@ -129,13 +127,13 @@ type Bootle struct {
 func (p *Project) PrepareEasyjsonEnv() error {
 	log.Println("Bootstrapping easyjson")
 	bootstrapDir := filepath.Join(p.Root, "bootstrap")
-	if err := os.Mkdir(bootstrapDir, 0777); err != nil {
-		return fmt.Errorf("Cannot create easyjson bootstrap dir: %v", err)
+	if err := os.Mkdir(bootstrapDir, os.ModePerm); err != nil {
+		return fmt.Errorf("cannot create easyjson bootstrap dir: %v", err)
 	}
 
 	bootstrapFile := filepath.Join(bootstrapDir, "bottle.go")
 	if err := os.WriteFile(bootstrapFile, []byte(EASYJSON_BOOTSTRAP_FILE_CONTENTS), 0644); err != nil {
-		return fmt.Errorf("Cannot create easyjson bootstrap file: %v", err)
+		return fmt.Errorf("cannot create easyjson bootstrap file: %v", err)
 	}
 
 	easyjsonDeps := []string{
@@ -158,7 +156,7 @@ func (p *Project) PrepareEasyjsonEnv() error {
 	}
 
 	if err := os.RemoveAll(bootstrapDir); err != nil {
-		return fmt.Errorf("Cannot remove bootstrap dir: %v", err)
+		return fmt.Errorf("cannot remove bootstrap dir: %v", err)
 	}
 
 	return nil
