@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	mapset "github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/heimdalr/dag"
 )
 
@@ -40,14 +40,14 @@ func WalkGraph(state *GeneratorState, visitorFn VisitNodeFn) error {
 
 // used to keep track of the navigation inside of the graph
 type GeneratorState struct {
-	VisitedNodes      mapset.Set
+	VisitedNodes      mapset.Set[string]
 	DependenciesGraph *dag.DAG
 	Data              interface{}
 }
 
 func NewGeneratorState(dependencies *dag.DAG, data interface{}) GeneratorState {
 	return GeneratorState{
-		VisitedNodes:      mapset.NewSet(),
+		VisitedNodes:      mapset.NewSet[string](),
 		DependenciesGraph: dependencies,
 		Data:              data,
 	}
