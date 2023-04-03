@@ -69,9 +69,7 @@ func (r *RefactoringPlan) DependenciesGraph() (*dag.DAG, error) {
 			}
 		}
 
-		for depName := range pkg.Dependencies.Iterator().C {
-			name := depName.(string)
-
+		for name := range pkg.Dependencies.Iterator().C {
 			// ensure the dependency is known by the DAG
 			if _, err := dependenciesGraph.GetVertex(name); err != nil {
 				_, found := r.Packages[name]

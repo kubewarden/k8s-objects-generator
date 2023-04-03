@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	mapset "github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 // Keeps track of all the `interface` objects that are defined inside of the
 // project
 type InterfaceRegistry struct {
-	interfacesByModule map[string]mapset.Set
+	interfacesByModule map[string]mapset.Set[string]
 }
 
 func NewInterfaceRegistry() InterfaceRegistry {
 	return InterfaceRegistry{
-		interfacesByModule: make(map[string]mapset.Set),
+		interfacesByModule: make(map[string]mapset.Set[string]),
 	}
 }
 
@@ -24,7 +24,7 @@ func NewInterfaceRegistry() InterfaceRegistry {
 func (r *InterfaceRegistry) RegisterInterface(module, name string) {
 	interfaces, known := r.interfacesByModule[module]
 	if !known {
-		interfaces = mapset.NewSet()
+		interfaces = mapset.NewSet[string]()
 	}
 	interfaces.Add(name)
 
