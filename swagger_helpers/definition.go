@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	mapset "github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set/v2"
 	openapi_spec "github.com/go-openapi/spec"
 	"github.com/pkg/errors"
 )
@@ -25,7 +25,7 @@ type Definition struct {
 	// For example, if a definition has a `meta` property of type
 	// `apimachinery/pkg/apis/meta/v1/ObjectMeta`, then this definition depends
 	// on `apimachinery/pkg/apis/meta/v1/`
-	dependencies mapset.Set
+	dependencies mapset.Set[string]
 }
 
 func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, error) {
@@ -42,7 +42,7 @@ func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, erro
 		SwaggerDefinition: definition,
 		PackageName:       packageName,
 		TypeName:          typeName,
-		dependencies:      mapset.NewSet(),
+		dependencies:      mapset.NewSet[string](),
 	}
 
 	if err := plan.computeDependencies(); err != nil {
@@ -53,7 +53,7 @@ func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, erro
 }
 
 func (d *Definition) computeDependencies() error {
-	propImports := []PropertyImport{}
+	var propImports []PropertyImport
 
 	for name, property := range d.SwaggerDefinition.Properties {
 		propImport, err := NewPropertyImportFromRef(&property.SchemaProps.Ref)
@@ -120,7 +120,7 @@ func (d *Definition) GeneratePatchedOpenAPIDef(gitRepo string, interfaces *Inter
 		return definition, nil
 	}
 
-	required := mapset.NewSet()
+	required := mapset.NewSet[string]()
 	for _, r := range d.SwaggerDefinition.Required {
 		required.Add(r)
 	}

@@ -1,7 +1,7 @@
 package swagger_helpers
 
 import (
-	mapset "github.com/deckarep/golang-set"
+	mapset "github.com/deckarep/golang-set/v2"
 	openapi_spec "github.com/go-openapi/spec"
 	"github.com/pkg/errors"
 )
@@ -14,14 +14,14 @@ type Package struct {
 	Definitions []*Definition
 
 	// list of package names this one depends on
-	Dependencies mapset.Set
+	Dependencies mapset.Set[string]
 }
 
 func NewPackage(name string) Package {
 	return Package{
 		Name:         name,
 		Definitions:  []*Definition{},
-		Dependencies: mapset.NewSet(),
+		Dependencies: mapset.NewSet[string](),
 	}
 }
 
