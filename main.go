@@ -103,10 +103,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := split.GenerateEasyjsonFiles(project, refactoringPlan); err != nil {
-		log.Fatal(err)
-	}
-
 	groupResource := split.NewGroupResource(afero.NewOsFs())
 	if err := groupResource.Generate(project, refactoringPlan); err != nil {
 		log.Fatal(err)
