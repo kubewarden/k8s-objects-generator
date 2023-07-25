@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 
 	"github.com/kubewarden/k8s-objects-generator/split"
@@ -106,5 +107,9 @@ func main() {
 	groupResource := split.NewGroupResource(afero.NewOsFs())
 	if err := groupResource.Generate(project, refactoringPlan); err != nil {
 		log.Fatal(err)
+	}
+
+	if err := project.RunGoModTidy(); err != nil {
+		log.Fatal(errors.Wrap(err, "error running go mod tidy"))
 	}
 }
