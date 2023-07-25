@@ -71,6 +71,12 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
 	}
 
+	readmeFile := filepath.Join(p.Root, "README.md")
+	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0644)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write README.md file %s", readmeFile)
+	}
+
 	gitignoreFile := filepath.Join(p.Root, ".gitignore")
 	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0644)
 	if err != nil {
