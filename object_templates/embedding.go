@@ -5,6 +5,9 @@ import "embed"
 //go:embed .gitignore.tmpl
 var GitIgnore string
 
+//go:embed README.md.tmpl
+var Readme string
+
 //go:embed apimachinery/*
 var ApimachineryRoot embed.FS
 

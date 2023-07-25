@@ -35,81 +35,32 @@ func (s *Splitter) ComputeRefactoringPlan() (*RefactoringPlan, error) {
 	return NewRefactoringPlan(&s.vanillaSwagger)
 }
 
-type walkerStateSwaggerData struct {
-	swaggerFiles map[string]string
-	project      Project
-}
-
 func (s *Splitter) GenerateSwaggerFiles(project Project, plan *RefactoringPlan) error {
 	swaggerFiles, err := plan.RenderNewSwaggerFiles(project.GitRepo)
 	if err != nil {
 		return err
 	}
 
-	dependenciesGraph, err := plan.DependenciesGraph()
-	if err != nil {
-		return err
-	}
+	for pkgName, jsonData := range swaggerFiles {
+		fmt.Printf("Generating models for package %s\n", pkgName)
 
-	stateData := walkerStateSwaggerData{
-		project:      project,
-		swaggerFiles: swaggerFiles,
-	}
-	state := NewGeneratorState(dependenciesGraph, stateData)
+		pathToSwagger := filepath.Join(project.OutputDir,
+			"src",
+			project.GitRepo,
+			pkgName)
+		if err := os.MkdirAll(pathToSwagger, 0777); err != nil {
+			return errors.Wrapf(err, "cannot create directory %s", pathToSwagger)
+		}
 
-	if err := WalkGraph(&state, swaggerGenerateModelsVisitorFn); err != nil {
-		return errors.Wrapf(err, "cannot generate swagger files")
-	}
+		fileName := filepath.Join(pathToSwagger, "swagger.json")
+		if err := os.WriteFile(fileName, []byte(jsonData), 0644); err != nil {
+			return errors.Wrapf(err, "cannot write %s", fileName)
+		}
 
-	return nil
-}
-
-func swaggerGenerateModelsVisitorFn(nodeID string, state *GeneratorState) error {
-	if state.VisitedNodes.Contains(nodeID) {
-		return nil
-	}
-
-	// Fist, ensure all the dependencies are generated
-	ancestors, err := state.DependenciesGraph.GetOrderedAncestors(nodeID)
-	if err != nil {
-		return errors.Wrapf(err, "cannot compute dependency graph of package %s", nodeID)
-	}
-
-	fmt.Printf("Ordered list of dependencies of packge %s: %+v\n", nodeID, ancestors)
-	for _, ancestor := range ancestors {
-		if err := swaggerGenerateModelsVisitorFn(ancestor, state); err != nil {
-			return err
+		if err := project.InvokeSwaggerModelGenerator(pkgName); err != nil {
+			return fmt.Errorf("swagger execution failed for module %s: %+v", pkgName, err)
 		}
 	}
-
-	// Now let's generate the actual namespace
-	fmt.Printf("Generating models for package %s\n", nodeID)
-
-	stateData := state.Data.(walkerStateSwaggerData)
-
-	jsonData, found := stateData.swaggerFiles[nodeID]
-	if !found {
-		return fmt.Errorf("Cannot find %s inside of list of patched swagger files", nodeID)
-	}
-
-	// write file
-	pathToSwagger := filepath.Join(stateData.project.OutputDir,
-		"src",
-		stateData.project.GitRepo,
-		nodeID)
-	if err := os.MkdirAll(pathToSwagger, 0777); err != nil {
-		return errors.Wrapf(err, "cannot create directory %s", pathToSwagger)
-	}
-
-	fileName := filepath.Join(pathToSwagger, "swagger.json")
-	if err := os.WriteFile(fileName, []byte(jsonData), 0644); err != nil {
-		return errors.Wrapf(err, "cannot write %s", fileName)
-	}
-
-	if err := stateData.project.InvokeSwaggerModelGenerator(nodeID); err != nil {
-		return fmt.Errorf("swagger execution failed for module %s: %+v", nodeID, err)
-	}
-	state.VisitedNodes.Add(nodeID)
 
 	return nil
 }

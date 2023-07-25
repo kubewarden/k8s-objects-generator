@@ -71,6 +71,12 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
 	}
 
+	readmeFile := filepath.Join(p.Root, "README.md")
+	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0644)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write README.md file %s", readmeFile)
+	}
+
 	gitignoreFile := filepath.Join(p.Root, ".gitignore")
 	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0644)
 	if err != nil {
@@ -89,7 +95,7 @@ module {{ .Repository }}
 
 go 1.17
 
-replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.2
+replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.3
 `
 
 func goModInit(fileName, gitRepo string) error {
@@ -114,52 +120,6 @@ func goModInit(fileName, gitRepo string) error {
 	}
 
 	return file.Close()
-}
-
-const EASYJSON_BOOTSTRAP_FILE_CONTENTS = `
-package bootstrap
-
-type Bootle struct {
-	Message string
-}
-`
-
-func (p *Project) PrepareEasyjsonEnv() error {
-	log.Println("Bootstrapping easyjson")
-	bootstrapDir := filepath.Join(p.Root, "bootstrap")
-	if err := os.Mkdir(bootstrapDir, os.ModePerm); err != nil {
-		return fmt.Errorf("cannot create easyjson bootstrap dir: %v", err)
-	}
-
-	bootstrapFile := filepath.Join(bootstrapDir, "bottle.go")
-	if err := os.WriteFile(bootstrapFile, []byte(EASYJSON_BOOTSTRAP_FILE_CONTENTS), 0644); err != nil {
-		return fmt.Errorf("cannot create easyjson bootstrap file: %v", err)
-	}
-
-	easyjsonDeps := []string{
-		"github.com/mailru/easyjson/gen",
-		"github.com/mailru/easyjson/jlexer",
-		"github.com/mailru/easyjson/jwriter",
-	}
-	for _, dep := range easyjsonDeps {
-		if err := p.RunGoGet(dep); err != nil {
-			return err
-		}
-	}
-
-	if err := p.RunEasyJson([]string{bootstrapFile}); err != nil {
-		return errors.Wrapf(err, "error running easyjson against bootstrap file")
-	}
-
-	if err := p.RunGoModTidy(); err != nil {
-		return errors.Wrapf(err, "error running `go mod tidy`")
-	}
-
-	if err := os.RemoveAll(bootstrapDir); err != nil {
-		return fmt.Errorf("cannot remove bootstrap dir: %v", err)
-	}
-
-	return nil
 }
 
 func (p *Project) RunGoModTidy() error {
@@ -230,27 +190,6 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 	extraEnv["GOPATH"] = p.OutputDir
 
 	return runCmd(cmdName, args, extraEnv, "")
-}
-
-func (p *Project) RunEasyJson(targets []string) error {
-	if len(targets) == 0 {
-		return nil
-	}
-
-	cmdName := "easyjson"
-	args := []string{"-all"}
-	args = append(args, targets...)
-
-	extraEnv := make(map[string]string)
-
-	// override GOPATH
-	extraEnv["GOPATH"] = p.OutputDir
-	// Add PATH, needed to find the `go` binary
-	extraEnv["PATH"] = os.Getenv("PATH")
-	// Add HOME, needed to find the go cache directory
-	extraEnv["HOME"] = os.Getenv("HOME")
-
-	return runCmd(cmdName, args, extraEnv, p.OutputDir)
 }
 
 func runCmd(cmdName string, args []string, extraEnv map[string]string, dir string) error {
