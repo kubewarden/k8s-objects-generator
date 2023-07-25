@@ -95,7 +95,7 @@ module {{ .Repository }}
 
 go 1.17
 
-replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.2
+replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.3
 `
 
 func goModInit(fileName, gitRepo string) error {
