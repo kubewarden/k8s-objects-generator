@@ -93,7 +93,7 @@ func (p *Project) SwaggerFile() string {
 const GO_MOD_TEMPLATE = `
 module {{ .Repository }}
 
-go 1.17
+go 1.20
 
 replace github.com/go-openapi/strfmt => github.com/kubewarden/strfmt v0.1.3
 `
