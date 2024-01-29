@@ -29,6 +29,9 @@ type Definition struct {
 }
 
 func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, error) {
+	// Some definitions need special tuning to work properly
+	patchDefinition(&definition, id)
+
 	path := strings.TrimPrefix(id, "io.k8s.")
 	chunks := strings.Split(path, ".")
 	if len(chunks) < 2 {
@@ -50,6 +53,15 @@ func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, erro
 	}
 
 	return &plan, nil
+}
+
+func patchDefinition(definition *openapi_spec.Schema, id string) {
+	// Ensure `Time` objects consumed by structs are accessed via pointers. This ensures they can be
+	// complitely omitted when they are not set.
+	// This fixes https://github.com/kubewarden/kubewarden-controller/issues/570
+	if id == "io.k8s.apimachinery.pkg.apis.meta.v1.Time" {
+		definition.AddExtension("x-nullable", true)
+	}
 }
 
 func (d *Definition) computeDependencies() error {
