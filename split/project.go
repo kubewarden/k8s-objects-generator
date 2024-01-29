@@ -188,6 +188,8 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 
 	extraEnv := make(map[string]string)
 	extraEnv["GOPATH"] = p.OutputDir
+	// Add PATH, needed to find the `go` binary
+	extraEnv["PATH"] = os.Getenv("PATH")
 
 	return runCmd(cmdName, args, extraEnv, "")
 }
