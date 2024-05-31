@@ -1,3 +1,5 @@
+[![Stable](https://img.shields.io/badge/status-stable-brightgreen?style=for-the-badge)](https://github.com/kubewarden/community/blob/main/REPOSITORIES.md#stable)
+
 This repository provides the CLI tool `k8s-objects-generator`.
 
 The purpose of this tool is to process the OpenAPI file provided by Kubernetes
