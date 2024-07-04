@@ -142,3 +142,37 @@ directory. This is the only directory you need to preserve.
 
 > **Note:** the name of the final Git repository can be changed using the `-repo`
 > flag.
+
+### Pushing new versions to kubewarden/k8s-objects
+
+Set `KUBERNETES_VERSION_MIN`, `KUBERNETES_VERSION_MAX` in `mass-generate.sh`,
+`KUBEMINOR` in `mass-push.sh` as needed.
+
+Delete and reclone kubewarden/k8s-objects. In my case:
+
+```console
+cd suse/kw
+rm k8s-objects; git clone git@github.com:kubewarden/k8s-objects.git
+```
+
+Generate all files for all k8s versions, each on its own branch:
+
+```console
+./mass-generate.sh -m commit.md --git-dir ~/suse/kw/k8s-objects
+```
+
+Now, push to upstream kubewarden/k8s-objects as needed. You can either
+push the new branch for the new k8s release (e.g: 1.30):
+
+```console
+cd ~/suse/kw/k8s-objects
+git push origin release-1.30
+git push origin v1.30.0-kw1
+```
+
+Or do a mass push, potentially overwritting old branches:
+
+```console
+mv ~/suse/kw/k8s-objects ~/hacking/kubernetes/kubewarden/k8s-objects
+./mass-push.sh -m commit.md --git-dir ~/suse/kw/k8s-objects
+```
