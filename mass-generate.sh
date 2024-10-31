@@ -85,8 +85,13 @@ for KUBEMINOR in $(eval "echo {$KUBERNETES_VERSION_MIN..$KUBERNETES_VERSION_MAX}
   fi
   rsync -av --exclude '.git' --delete-after "$OUT_DIR"/src/github.com/kubewarden/k8s-objects/ "$GIT_DIR"
   golangci-lint run ./...
-  git add .
-  git commit -F "$GIT_COMMIT_MSG_FILE"
-  git tag -s -a -m "$GIT_TAG" "$GIT_TAG"
+  # We need to check if there are changes before committing. Otherwise, 
+  # we will try to create a empty commit and the script will fail.
+  if [[ $(( n = $(git status --porcelain | wc -l))) -gt 0 ]]; then
+	  echo "Changes detected, committing and tagging"
+	  git add .
+	  git commit -F "$GIT_COMMIT_MSG_FILE"
+	  git tag -s -a -m "$GIT_TAG" "$GIT_TAG"
+  fi
   cd -
 done
