@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/deckarep/golang-set/v2 v2.6.0
+	github.com/deckarep/golang-set/v2 v2.7.0
 	github.com/go-openapi/spec v0.21.0
 	github.com/heimdalr/dag v1.5.0
 	github.com/iancoleman/strcase v0.3.0
