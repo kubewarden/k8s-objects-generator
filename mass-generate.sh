@@ -12,7 +12,7 @@ GIT_DIR=~/checkout/kubernetes/kubewarden/k8s-objects
 
 # Able to define Kubernetes versions range (for testing)
 KUBERNETES_VERSION_MIN="${KUBEMINOR_MIN:-14}"
-KUBERNETES_VERSION_MAX="${KUBEMINOR_MAX:-31}"
+KUBERNETES_VERSION_MAX="${KUBEMINOR_MAX:-32}"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
