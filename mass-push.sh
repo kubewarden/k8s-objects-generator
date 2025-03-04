@@ -9,7 +9,7 @@ set -ex
 
 GIT_DIR=~/hacking/kubernetes/kubewarden/k8s-objects
 
-for KUBEMINOR in {14..31}; do
+for KUBEMINOR in {14..32}; do
   echo ==================================
   echo PROCESSING KUBERNETES 1.$KUBEMINOR
   echo ==================================
