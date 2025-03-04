@@ -88,7 +88,7 @@ func registerOperation{{pascalize $operationGroup }}{{ pascalize $operation }}{{
 	{{- else if and .IsBodyParam .Schema (not .IsArray) (not .IsMap) (not .IsStream) }}
 		{{ template "modelparamstringregistrator" . }}
 		{{ template "modelparamregistrator" . }}
-		{{/* Do not mark body flag as required, since the individial flag for body field will be added separately */}}
+		{{/* Do not mark body flag as required, since the individual flag for body field will be added separately */}}
 	{{- else }}
 		// warning: go type {{ .GoType }} is not supported by go-swagger cli yet.
 	{{- end }}
@@ -96,7 +96,7 @@ func registerOperation{{pascalize $operationGroup }}{{ pascalize $operation }}{{
 }
 {{- end }}
 
-{{/*functions to retreive each field of params*/}}
+{{/*functions to retrieve each field of params*/}}
 {{- range .Params }}
 func retrieveOperation{{pascalize $operationGroup }}{{ pascalize $operation }}{{ pascalize .Name }}Flag(m *{{ $operationPkgAlias }}.{{ pascalize $operation }}Params, cmdPrefix string, cmd *cobra.Command) (error,bool){
 	retAdded := false
@@ -146,7 +146,7 @@ func retrieveOperation{{pascalize $operationGroup }}{{ pascalize $operation }}{{
 		m.{{.ID}} = {{ $flagModelVar }}
 	}
 	if dryRun && debug {
-		{{/* dry run we don't get trasnport debug strings, so print it here*/}}
+		{{/* dry run we don't get transport debug strings, so print it here*/}}
 		{{- $bodyDebugVar := printf "%vDebugBytes" (camelize $flagValueVar) }}
 		{{ $bodyDebugVar }}, err := json.Marshal(m.{{.ID}})
 		if err != nil{

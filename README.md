@@ -170,7 +170,7 @@ git push origin release-1.30
 git push origin v1.30.0-kw1
 ```
 
-Or do a mass push, potentially overwritting old branches:
+Or do a mass push, potentially overwriting old branches:
 
 ```console
 mv ~/suse/kw/k8s-objects ~/hacking/kubernetes/kubewarden/k8s-objects

@@ -71,7 +71,7 @@ func ({{ .ReceiverName }} *{{ pascalize .Name }}) ServeHTTP(rw http.ResponseWrit
   }
   var principal {{ if .PrincipalIsNullable }}*{{ end }}{{ .Principal }}
   if uprinc != nil {
-    principal = {{ if eq .Principal "inferface{}" }}uprinc{{ else }}uprinc.({{ if .PrincipalIsNullable }}*{{ end }}{{ .Principal }}) // this is really a {{ .Principal }}, I promise{{ end }}
+    principal = {{ if eq .Principal "interface{}" }}uprinc{{ else }}uprinc.({{ if .PrincipalIsNullable }}*{{ end }}{{ .Principal }}) // this is really a {{ .Principal }}, I promise{{ end }}
   }
   {{ end }}
   if err := {{ .ReceiverName }}.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

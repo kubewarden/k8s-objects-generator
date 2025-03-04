@@ -9,7 +9,7 @@
         if err != nil{
             return err, false
         }
-        {{- /* reciever by convention is m for CLI */}}
+        {{- /* receiver by convention is m for CLI */}}
         m.{{ pascalize .Name }} = {{- if .IsNullable }}&{{- end }}{{ $flagValueVar }}
     {{- else if or (eq .GoType "strfmt.DateTime") (eq .GoType "strfmt.ObjectId") (eq .GoType "strfmt.UUID" ) }} {{/*Get flag value as string, then parse it*/}}
         {{/*Many of the strfmt types can be added here*/}}
@@ -37,7 +37,7 @@
         if err != nil{
             return err, false
         }
-        {{- /* reciever by convention is m for CLI */}}
+        {{- /* receiver by convention is m for CLI */}}
         m.{{ pascalize .Name }} = {{ $flagValueVar }}
     {{- else if or (eq .GoType "[]strfmt.DateTime") (eq .GoType "[]strfmt.ObjectId") (eq .GoType "[]strfmt.UUID") }} {{/*Get flag value as string, then parse it*/}}
         {{ template "flagnamevar" . }}

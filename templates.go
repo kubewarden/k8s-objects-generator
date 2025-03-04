@@ -32,7 +32,7 @@ func writeTemplates(destinationRoot string) error {
 		} else {
 			src, err := templatesFS.Open(path)
 			if err != nil {
-				return errors.Wrapf(err, "Cannot open embeded file %s for reading", path)
+				return errors.Wrapf(err, "Cannot open embedded file %s for reading", path)
 			}
 			dstFileName := filepath.Join(destinationRoot, path)
 			dst, err := os.Create(dstFileName)

@@ -38,7 +38,7 @@ func TestNewRefactoringPlan(t *testing.T) {
 		},
 	}
 
-	// Another definition - from a different pacakge, plus it's an interface
+	// Another definition - from a different package, plus it's an interface
 	swagger.Definitions["io.k8s.core.v1.Raw"] = openapi_spec.Schema{
 		SchemaProps: openapi_spec.SchemaProps{
 			Description: "Raw desc",

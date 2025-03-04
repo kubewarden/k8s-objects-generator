@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Holds information about how the big swagger file is going to be splitted
+// Holds information about how the big swagger file is going to be split
 type RefactoringPlan struct {
 	Packages          map[string]swagger_helpers.Package
 	Interfaces        swagger_helpers.InterfaceRegistry
