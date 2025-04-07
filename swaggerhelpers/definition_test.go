@@ -398,7 +398,7 @@ func TestPatchSchema(t *testing.T) {
 			t.Errorf("cannot find %s property", testCase.PropName)
 			continue
 		}
-		extensions := prop.VendorExtensible.Extensions
+		extensions := prop.Extensions
 		_, found = extensions["x-go-type"]
 		if testCase.XGoTypeIsSet && !found {
 			t.Errorf("x-go-type is not set for %s property", testCase.PropName)
@@ -407,7 +407,7 @@ func TestPatchSchema(t *testing.T) {
 			t.Errorf("x-go-type is was not supposed to be set for %s property", testCase.PropName)
 		}
 
-		ref := prop.SchemaProps.Ref.GetPointer()
+		ref := prop.Ref.GetPointer()
 		refIsNull := ref.IsEmpty()
 		if testCase.RefIsNull && !refIsNull {
 			t.Errorf("%s property should not have a ref set anymore", testCase.PropName)
