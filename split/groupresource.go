@@ -90,7 +90,12 @@ func (g *groupResource) generateResourceFile(path string, templ *template.Templa
 	if err != nil {
 		return err
 	}
-	defer gvkFile.Close()
+
+	defer func() {
+		if cerr := gvkFile.Close(); cerr != nil {
+			log.Printf("failed to close file %s: %v", path, cerr)
+		}
+	}()
 
 	if err := templ.Execute(gvkFile, gvk); err != nil {
 		return fmt.Errorf("failed to process template for %s: %v", gvk.String(), err)
@@ -144,7 +149,11 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 			return err
 		}
 		log.Println("File", filepath.Base(path), "copied into the", filepath.Dir(targetFilePath))
-		defer targetFile.Close()
+		defer func() {
+			if cerr := targetFile.Close(); cerr != nil {
+				log.Printf("failed to close file %s: %v", path, cerr)
+			}
+		}()
 		if _, err = targetFile.Write(sourceBuf); err != nil {
 			return err
 		}

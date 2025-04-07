@@ -32,7 +32,11 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadUrl)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			log.Printf("failed to close response body: %v", cerr)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
