@@ -82,8 +82,8 @@ func TestComputeDependenciesSimpleSchema(t *testing.T) {
 
 	for _, testCase := range cases {
 		properties := make(map[string]openapi_spec.Schema)
-		for counter, refUrl := range testCase.refs {
-			ref, err := openapi_spec.NewRef(refUrl)
+		for counter, refURL := range testCase.refs {
+			ref, err := openapi_spec.NewRef(refURL)
 			if err != nil {
 				t.Errorf("Cannot create ref: %v", err)
 			}
@@ -126,21 +126,21 @@ func TestComputeDependenciesSimpleSchema(t *testing.T) {
 
 func TestComputeDependenciesSchemaWithAdditionalProperties(t *testing.T) {
 	cases := []struct {
-		refUrl       string
+		refURL       string
 		expectedDeps []string
 	}{
 		{
-			refUrl:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
+			refURL:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
 			expectedDeps: []string{},
 		},
 		{
-			refUrl:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
+			refURL:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
 			expectedDeps: []string{"apimachinery/pkg/apis/meta/v1"},
 		},
 	}
 
 	for _, testCase := range cases {
-		ref, err := openapi_spec.NewRef(testCase.refUrl)
+		ref, err := openapi_spec.NewRef(testCase.refURL)
 		if err != nil {
 			t.Errorf("Cannot create ref: %v", err)
 		}
@@ -192,21 +192,21 @@ func TestComputeDependenciesSchemaWithAdditionalProperties(t *testing.T) {
 
 func TestComputeDependenciesSchemaWithItems(t *testing.T) {
 	cases := []struct {
-		refUrl       string
+		refURL       string
 		expectedDeps []string
 	}{
 		{
-			refUrl:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
+			refURL:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
 			expectedDeps: []string{},
 		},
 		{
-			refUrl:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
+			refURL:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
 			expectedDeps: []string{"apimachinery/pkg/apis/meta/v1"},
 		},
 	}
 
 	for _, testCase := range cases {
-		ref, err := openapi_spec.NewRef(testCase.refUrl)
+		ref, err := openapi_spec.NewRef(testCase.refURL)
 		if err != nil {
 			t.Errorf("Cannot create ref: %v", err)
 		}

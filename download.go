@@ -22,15 +22,15 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 		return nil, errors.Wrapf(err, "cannot parse kubernetes version %s", kubeVersion)
 	}
 
-	downloadUrl := fmt.Sprintf(
+	downloadURL := fmt.Sprintf(
 		"https://github.com/kubernetes/kubernetes/raw/v%d.%d.%d/api/openapi-spec/swagger.json",
 		version.Major, version.Minor, version.Patch)
 
-	log.Printf("Downloading swagger file for Kubernetes %s from %s", version.String(), downloadUrl)
+	log.Printf("Downloading swagger file for Kubernetes %s from %s", version.String(), downloadURL)
 
-	resp, err := http.Get(downloadUrl)
+	resp, err := http.Get(downloadURL)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadUrl)
+		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadURL)
 	}
 	defer func() {
 		if cerr := resp.Body.Close(); cerr != nil {
@@ -40,7 +40,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Cannot read contents of response from %s", downloadUrl)
+		return nil, errors.Wrapf(err, "Cannot read contents of response from %s", downloadURL)
 	}
 
 	if resp.StatusCode > 299 {
