@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/afero"
 
 	"github.com/kubewarden/k8s-objects-generator/object_templates"
-	"github.com/kubewarden/k8s-objects-generator/swagger_helpers"
+	"github.com/kubewarden/k8s-objects-generator/swaggerhelpers"
 )
 
 const (
@@ -99,7 +99,7 @@ func (g *groupResource) generateResourceFile(path string, templ *template.Templa
 	return nil
 }
 
-func groupKindResource(definition *swagger_helpers.Definition) *groupVersionResource {
+func groupKindResource(definition *swaggerhelpers.Definition) *groupVersionResource {
 	extension := definition.SwaggerDefinition.Extensions
 	if extension == nil || extension[kubernetesGroupVersionKindKey] == nil {
 		return nil

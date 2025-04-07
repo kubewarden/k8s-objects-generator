@@ -5,21 +5,21 @@ import (
 
 	openapi_spec "github.com/go-openapi/spec"
 	"github.com/heimdalr/dag"
-	"github.com/kubewarden/k8s-objects-generator/swagger_helpers"
+	"github.com/kubewarden/k8s-objects-generator/swaggerhelpers"
 	"github.com/pkg/errors"
 )
 
 // Holds information about how the big swagger file is going to be split
 type RefactoringPlan struct {
-	Packages          map[string]swagger_helpers.Package
-	Interfaces        swagger_helpers.InterfaceRegistry
+	Packages          map[string]swaggerhelpers.Package
+	Interfaces        swaggerhelpers.InterfaceRegistry
 	SwaggerVersion    string
 	KubernetesVersion string
 }
 
 func NewRefactoringPlan(swagger *openapi_spec.Swagger) (*RefactoringPlan, error) {
-	packages := make(map[string]swagger_helpers.Package)
-	interfaces := swagger_helpers.NewInterfaceRegistry()
+	packages := make(map[string]swaggerhelpers.Package)
+	interfaces := swaggerhelpers.NewInterfaceRegistry()
 
 	kubernetesVersion := "undefined"
 	if swagger.Info != nil {
@@ -27,7 +27,7 @@ func NewRefactoringPlan(swagger *openapi_spec.Swagger) (*RefactoringPlan, error)
 	}
 
 	for id, definition := range swagger.Definitions {
-		newDefinitionRefactoringPlan, err := swagger_helpers.NewDefinition(definition, id)
+		newDefinitionRefactoringPlan, err := swaggerhelpers.NewDefinition(definition, id)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot parse definition with id %s", id)
 		}
@@ -42,7 +42,7 @@ func NewRefactoringPlan(swagger *openapi_spec.Swagger) (*RefactoringPlan, error)
 
 		pkg, pkgKnown := packages[newDefinitionRefactoringPlan.PackageName]
 		if !pkgKnown {
-			pkg = swagger_helpers.NewPackage(newDefinitionRefactoringPlan.PackageName)
+			pkg = swaggerhelpers.NewPackage(newDefinitionRefactoringPlan.PackageName)
 		}
 
 		pkg.AddDefinitionRefactoringPlan(newDefinitionRefactoringPlan)

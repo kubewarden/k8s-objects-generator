@@ -1,4 +1,4 @@
-package swagger_helpers
+package swaggerhelpers
 
 import (
 	"fmt"
@@ -38,11 +38,12 @@ func (p *PropertyImport) ToMap(gitRepo string) map[string]interface{} {
 // Given a `ref` string like:
 // `/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector`
 // return:
-//  `propertyImport"{
-//      package_name: "apimachinery/pkg/apis/meta/v1",
-//      alias: "apimachinery_pkgs_apis_meta_v1",
-//      type_name: "LabelSelector",
-//  }
+//
+//	propertyImport"{
+//	   package_name: "apimachinery/pkg/apis/meta/v1",
+//	   alias: "apimachinery_pkgs_apis_meta_v1",
+//	   type_name: "LabelSelector",
+//	}
 func NewPropertyImportFromRef(ref *openapi_spec.Ref) (PropertyImport, error) {
 	refPointer := ref.GetPointer()
 	if refPointer == nil || refPointer.IsEmpty() {
