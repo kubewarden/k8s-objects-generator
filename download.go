@@ -44,7 +44,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 	}
 
 	if resp.StatusCode > 299 {
-		return nil, fmt.Errorf("Response failed with status code: %d and body: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("response failed with status code: %d and body: %s", resp.StatusCode, string(body))
 	}
 
 	return &SwaggerData{
