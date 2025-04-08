@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/afero"
 
 	"github.com/kubewarden/k8s-objects-generator/object_templates"
-	"github.com/kubewarden/k8s-objects-generator/swagger_helpers"
+	"github.com/kubewarden/k8s-objects-generator/swaggerhelpers"
 )
 
 const (
@@ -86,11 +86,16 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 }
 
 func (g *groupResource) generateResourceFile(path string, templ *template.Template, gvk *groupVersionResource) error {
-	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0644)
+	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return err
 	}
-	defer gvkFile.Close()
+
+	defer func() {
+		if cerr := gvkFile.Close(); cerr != nil {
+			log.Printf("failed to close file %s: %v", path, cerr)
+		}
+	}()
 
 	if err := templ.Execute(gvkFile, gvk); err != nil {
 		return fmt.Errorf("failed to process template for %s: %v", gvk.String(), err)
@@ -99,7 +104,7 @@ func (g *groupResource) generateResourceFile(path string, templ *template.Templa
 	return nil
 }
 
-func groupKindResource(definition *swagger_helpers.Definition) *groupVersionResource {
+func groupKindResource(definition *swaggerhelpers.Definition) *groupVersionResource {
 	extension := definition.SwaggerDefinition.Extensions
 	if extension == nil || extension[kubernetesGroupVersionKindKey] == nil {
 		return nil
@@ -139,12 +144,16 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 			return nil
 		}
 		targetFilePath := filepath.Join(targetRoot, path)
-		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0644)
+		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0o644)
 		if err != nil {
 			return err
 		}
 		log.Println("File", filepath.Base(path), "copied into the", filepath.Dir(targetFilePath))
-		defer targetFile.Close()
+		defer func() {
+			if cerr := targetFile.Close(); cerr != nil {
+				log.Printf("failed to close file %s: %v", path, cerr)
+			}
+		}()
 		if _, err = targetFile.Write(sourceBuf); err != nil {
 			return err
 		}

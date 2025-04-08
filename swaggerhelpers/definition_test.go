@@ -1,4 +1,4 @@
-package swagger_helpers
+package swaggerhelpers
 
 import (
 	"fmt"
@@ -82,8 +82,8 @@ func TestComputeDependenciesSimpleSchema(t *testing.T) {
 
 	for _, testCase := range cases {
 		properties := make(map[string]openapi_spec.Schema)
-		for counter, refUrl := range testCase.refs {
-			ref, err := openapi_spec.NewRef(refUrl)
+		for counter, refURL := range testCase.refs {
+			ref, err := openapi_spec.NewRef(refURL)
 			if err != nil {
 				t.Errorf("Cannot create ref: %v", err)
 			}
@@ -126,21 +126,21 @@ func TestComputeDependenciesSimpleSchema(t *testing.T) {
 
 func TestComputeDependenciesSchemaWithAdditionalProperties(t *testing.T) {
 	cases := []struct {
-		refUrl       string
+		refURL       string
 		expectedDeps []string
 	}{
 		{
-			refUrl:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
+			refURL:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
 			expectedDeps: []string{},
 		},
 		{
-			refUrl:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
+			refURL:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
 			expectedDeps: []string{"apimachinery/pkg/apis/meta/v1"},
 		},
 	}
 
 	for _, testCase := range cases {
-		ref, err := openapi_spec.NewRef(testCase.refUrl)
+		ref, err := openapi_spec.NewRef(testCase.refURL)
 		if err != nil {
 			t.Errorf("Cannot create ref: %v", err)
 		}
@@ -192,21 +192,21 @@ func TestComputeDependenciesSchemaWithAdditionalProperties(t *testing.T) {
 
 func TestComputeDependenciesSchemaWithItems(t *testing.T) {
 	cases := []struct {
-		refUrl       string
+		refURL       string
 		expectedDeps []string
 	}{
 		{
-			refUrl:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
+			refURL:       "#/definitions/io.k8s.api.admissionregistration.v1.MutatingWebhookSpec",
 			expectedDeps: []string{},
 		},
 		{
-			refUrl:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
+			refURL:       "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
 			expectedDeps: []string{"apimachinery/pkg/apis/meta/v1"},
 		},
 	}
 
 	for _, testCase := range cases {
-		ref, err := openapi_spec.NewRef(testCase.refUrl)
+		ref, err := openapi_spec.NewRef(testCase.refURL)
 		if err != nil {
 			t.Errorf("Cannot create ref: %v", err)
 		}
@@ -398,7 +398,7 @@ func TestPatchSchema(t *testing.T) {
 			t.Errorf("cannot find %s property", testCase.PropName)
 			continue
 		}
-		extensions := prop.VendorExtensible.Extensions
+		extensions := prop.Extensions
 		_, found = extensions["x-go-type"]
 		if testCase.XGoTypeIsSet && !found {
 			t.Errorf("x-go-type is not set for %s property", testCase.PropName)
@@ -407,7 +407,7 @@ func TestPatchSchema(t *testing.T) {
 			t.Errorf("x-go-type is was not supposed to be set for %s property", testCase.PropName)
 		}
 
-		ref := prop.SchemaProps.Ref.GetPointer()
+		ref := prop.Ref.GetPointer()
 		refIsNull := ref.IsEmpty()
 		if testCase.RefIsNull && !refIsNull {
 			t.Errorf("%s property should not have a ref set anymore", testCase.PropName)
