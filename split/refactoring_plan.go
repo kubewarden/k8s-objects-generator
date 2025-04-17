@@ -35,7 +35,6 @@ func NewRefactoringPlan(swagger *openapi_spec.Swagger) (*RefactoringPlan, error)
 		if ((len(definition.Type) == 1 && definition.Type[0] == "object") || (len(definition.Type) == 0)) &&
 			len(definition.Properties) == 0 &&
 			definition.AdditionalProperties == nil {
-
 			// this is a go interface
 			interfaces.RegisterInterface(newDefinitionRefactoringPlan.PackageName, newDefinitionRefactoringPlan.TypeName)
 		}
