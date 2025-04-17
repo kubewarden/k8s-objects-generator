@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Takes care of splitting the single big swagger file of Kubernetes
-// into smaller ones, one package
+// Splitter takes care of splitting the single big swagger file of Kubernetes
+// into smaller ones, one package.
 type Splitter struct {
 	vanillaSwagger openapi_spec.Swagger
 }

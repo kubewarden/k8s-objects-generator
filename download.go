@@ -15,7 +15,8 @@ type SwaggerData struct {
 	KubernetesVersion string
 }
 
-// Downloads the swagger file for the Kubernetes version specified by the user
+// DownloadSwagger downloads the swagger file for the Kubernetes version
+// specified by the user.
 func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 	version, err := semver.ParseTolerant(kubeVersion)
 	if err != nil {

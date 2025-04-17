@@ -11,7 +11,7 @@ import (
 	"github.com/kubewarden/k8s-objects-generator/common"
 )
 
-// Wrapper around a Swagger Definition
+// Definition is wrapper around a Swagger Definition.
 type Definition struct {
 	// Original definition
 	SwaggerDefinition openapi_spec.Schema
@@ -165,8 +165,8 @@ func (d *Definition) GeneratePatchedOpenAPIDef(gitRepo string, interfaces *Inter
 	return definition, nil
 }
 
-// Changes the Ref value of the provided schema object to replace all
-// references with x-go-import statements
+// patchSchemaRef changes the Ref value of the provided schema object to replace all
+// references with x-go-import statements.
 func patchSchemaRef(schema *openapi_spec.Schema,
 	definitionPackage string,
 	interfaces *InterfaceRegistry,

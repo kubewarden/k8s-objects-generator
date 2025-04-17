@@ -19,8 +19,8 @@ func (p *PropertyImport) IsEmpty() bool {
 	return p.PackageName == "" && p.Alias == "" && p.TypeName == ""
 }
 
-// Convert PropertyImport into a swagger x-go-type interface
-// * `gitRepo`: name of the repository that is going to host the code, e.g. `github.com/kubewarden/k8s-objects`
+// ToMap converts PropertyImport into a swagger x-go-type interface.
+// * `gitRepo`: name of the repository that is going to host the code, e.g. `github.com/kubewarden/k8s-objects`.
 func (p *PropertyImport) ToMap(gitRepo string) map[string]interface{} {
 	outerObj := make(map[string]interface{})
 
