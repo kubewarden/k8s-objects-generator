@@ -7,6 +7,8 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 	openapi_spec "github.com/go-openapi/spec"
 	"github.com/pkg/errors"
+
+	"github.com/kubewarden/k8s-objects-generator/common"
 )
 
 // Wrapper around a Swagger Definition
@@ -34,7 +36,7 @@ func NewDefinition(definition openapi_spec.Schema, id string) (*Definition, erro
 
 	path := strings.TrimPrefix(id, "io.k8s.")
 	chunks := strings.Split(path, ".")
-	if len(chunks) < 2 {
+	if len(chunks) < common.ChunkNumber {
 		return nil,
 			fmt.Errorf("cannot build definition refactoring plan: wrong number of chunks: %v", chunks)
 	}

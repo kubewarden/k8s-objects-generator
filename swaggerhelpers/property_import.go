@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	openapi_spec "github.com/go-openapi/spec"
+	"github.com/kubewarden/k8s-objects-generator/common"
 )
 
 type PropertyImport struct {
@@ -53,7 +54,7 @@ func NewPropertyImportFromRef(ref *openapi_spec.Ref) (PropertyImport, error) {
 
 	namespace := strings.TrimPrefix(refPointer.String(), "/definitions/io.k8s.")
 	chunks := strings.Split(namespace, ".")
-	if len(chunks) < 2 {
+	if len(chunks) < common.ChunkNumber {
 		return PropertyImport{},
 			fmt.Errorf("ref -> chunk: not enough chunks for %s: %+v", ref, chunks)
 	}

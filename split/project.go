@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/kubewarden/k8s-objects-generator/common"
 	"github.com/kubewarden/k8s-objects-generator/object_templates"
 )
 
@@ -153,7 +154,7 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 	cmdName := "swagger"
 
 	packageNameChunks := strings.Split(packageName, "/")
-	if len(packageNameChunks) < 2 {
+	if len(packageNameChunks) < common.ChunkNumber {
 		return fmt.Errorf("package name %s doesn't have enough chunks", packageName)
 	}
 
