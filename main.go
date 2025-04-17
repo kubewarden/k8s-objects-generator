@@ -55,16 +55,16 @@ func main() {
 
 	outputDir, err = filepath.Abs(outputDir)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	templatesTmpDir, err := os.MkdirTemp("", "k8s-objects-generator-swagger-templates")
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	if err = writeTemplates(templatesTmpDir); err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	log.Printf("Created templates at %s", templatesTmpDir)
 
@@ -81,35 +81,35 @@ func main() {
 		filepath.Join(templatesTmpDir, "swagger_templates"),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	log.Print("Initializing target directory")
 	err = project.Init(swaggerData.Data, swaggerData.KubernetesVersion, LICENSE)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	splitter, err := split.NewSplitter(project.SwaggerFile())
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	refactoringPlan, err := splitter.ComputeRefactoringPlan()
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	if err := splitter.GenerateSwaggerFiles(project, refactoringPlan); err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	groupResource := split.NewGroupResource(afero.NewOsFs())
 	if err := groupResource.Generate(project, refactoringPlan); err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	if err := project.RunGoModTidy(); err != nil {
-		log.Fatal(errors.Wrap(err, "error running go mod tidy"))
+		log.Panic(errors.Wrap(err, "error running go mod tidy"))
 	}
 }
