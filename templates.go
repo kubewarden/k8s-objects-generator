@@ -19,15 +19,15 @@ func writeTemplates(destinationRoot string) error {
 		return errors.Wrapf(err, "cannot remove directory %s", destinationRoot)
 	}
 
-	walkDirFn := func(path string, d os.DirEntry, err error) error {
+	walkDirFn := func(path string, d os.DirEntry, walkErr error) error {
 		if path == "." {
 			return nil
 		}
 
 		if d.IsDir() {
-			err := os.MkdirAll(filepath.Join(destinationRoot, path), 0o777)
-			if err != nil && !os.IsExist(err) {
-				return err
+			err2 := os.MkdirAll(filepath.Join(destinationRoot, path), 0o777)
+			if err2 != nil && !os.IsExist(err2) {
+				return err2
 			}
 			return nil
 		}
