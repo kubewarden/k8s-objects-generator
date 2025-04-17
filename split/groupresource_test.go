@@ -19,12 +19,12 @@ var groupInfoGold string
 
 func TestKubernetesExtensionParse(t *testing.T) {
 	tests := []struct {
-		extensionJson   string
+		extensionJSON   string
 		extensionParsed bool
 		expectedGVK     *groupVersionResource
 	}{
 		{
-			extensionJson: `{"x-kubernetes-group-version-kind": [
+			extensionJSON: `{"x-kubernetes-group-version-kind": [
         						{
           							"group": "events.k8s.io",
 									"kind": "Event",
@@ -39,7 +39,7 @@ func TestKubernetesExtensionParse(t *testing.T) {
 			},
 		},
 		{
-			extensionJson: `{"x-kubernetes-group-version-kind": [
+			extensionJSON: `{"x-kubernetes-group-version-kind": [
         						{
           							"group": "",
           							"kind": "DeleteOptions",
@@ -57,7 +57,7 @@ func TestKubernetesExtensionParse(t *testing.T) {
 
 	for _, tt := range tests {
 		extension := spec.VendorExtensible{}
-		require.NoError(t, extension.UnmarshalJSON([]byte(tt.extensionJson)))
+		require.NoError(t, extension.UnmarshalJSON([]byte(tt.extensionJSON)))
 		kubeExtension, isKubeExtension := asKubernetesExtension(extension.Extensions)
 		assert.Equal(t, isKubeExtension, tt.extensionParsed)
 		if tt.extensionParsed {
