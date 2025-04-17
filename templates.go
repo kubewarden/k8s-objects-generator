@@ -25,7 +25,7 @@ func writeTemplates(destinationRoot string) error {
 		}
 
 		if d.IsDir() {
-			err2 := os.MkdirAll(filepath.Join(destinationRoot, path), 0o777)
+			err2 := os.MkdirAll(filepath.Join(destinationRoot, path), 0o750)
 			if err2 != nil && !os.IsExist(err2) {
 				return err2
 			}

@@ -45,7 +45,7 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 		return errors.Wrapf(err, "cannot cleanup dir %s", p.Root)
 	}
 
-	if err = os.MkdirAll(p.Root, os.ModePerm); err != nil {
+	if err = os.MkdirAll(p.Root, 0o750); err != nil {
 		return errors.Wrapf(err, "cannot create dir %s", p.Root)
 	}
 
@@ -56,30 +56,30 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 	log.Printf("Created `go.mod` under %s", goModFileName)
 
 	swaggerFileName := p.SwaggerFile()
-	if err := os.WriteFile(swaggerFileName, swaggerData, 0644); err != nil {
+	if err := os.WriteFile(swaggerFileName, swaggerData, 0o600); err != nil {
 		return errors.Wrapf(err, "cannot write swagger file inside of project root: %s", swaggerFileName)
 	}
 
 	kubernetesVersionFile := filepath.Join(p.Root, "KUBERNETES_VERSION")
-	err = os.WriteFile(kubernetesVersionFile, []byte(kubernetesVersion), 0644)
+	err = os.WriteFile(kubernetesVersionFile, []byte(kubernetesVersion), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write KUBERNETES_VERSION file %s", kubernetesVersionFile)
 	}
 
 	licenseFile := filepath.Join(p.Root, "LICENSE")
-	err = os.WriteFile(licenseFile, []byte(license), 0644)
+	err = os.WriteFile(licenseFile, []byte(license), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
 	}
 
 	readmeFile := filepath.Join(p.Root, "README.md")
-	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0644)
+	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write README.md file %s", readmeFile)
 	}
 
 	gitignoreFile := filepath.Join(p.Root, ".gitignore")
-	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0644)
+	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write .gitignore file %s", licenseFile)
 	}

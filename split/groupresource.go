@@ -86,7 +86,7 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 }
 
 func (g *groupResource) generateResourceFile(path string, templ *template.Template, gvk *groupVersionResource) error {
-	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o644)
+	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:mnd // mnd doesn't support file octals yet
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 			return nil
 		}
 		targetFilePath := filepath.Join(targetRoot, path)
-		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0o644)
+		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0o600) //nolint:mnd // mnd doesn't support file octals yet
 		if err != nil {
 			return err
 		}
