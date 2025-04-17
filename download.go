@@ -28,7 +28,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 
 	log.Printf("Downloading swagger file for Kubernetes %s from %s", version.String(), downloadURL)
 
-	resp, err := http.Get(downloadURL)
+	resp, err := http.Get(downloadURL) //nolint:gosec,noctx // let's keep the code simple, we just do 1 request..
 	if err != nil {
 		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadURL)
 	}
