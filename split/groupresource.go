@@ -98,7 +98,7 @@ func (g *groupResource) generateResourceFile(path string, templ *template.Templa
 	}()
 
 	if err := templ.Execute(gvkFile, gvk); err != nil {
-		return fmt.Errorf("failed to process template for %s: %v", gvk.String(), err)
+		return fmt.Errorf("failed to process template for %s: %w", gvk.String(), err)
 	}
 
 	return nil

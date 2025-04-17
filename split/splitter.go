@@ -58,7 +58,7 @@ func (s *Splitter) GenerateSwaggerFiles(project Project, plan *RefactoringPlan) 
 		}
 
 		if err := project.InvokeSwaggerModelGenerator(pkgName); err != nil {
-			return fmt.Errorf("swagger execution failed for module %s: %+v", pkgName, err)
+			return fmt.Errorf("swagger execution failed for module %s: %+w", pkgName, err)
 		}
 	}
 
