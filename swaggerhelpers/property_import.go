@@ -35,6 +35,7 @@ func (p *PropertyImport) ToMap(gitRepo string) map[string]interface{} {
 	return outerObj
 }
 
+// NewPropertyImportFromRef returns a propertImport from a Ref.
 // Given a `ref` string like:
 // `/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector`
 // return:
