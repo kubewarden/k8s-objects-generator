@@ -43,7 +43,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 		return nil, errors.Wrapf(err, "Cannot read contents of response from %s", downloadURL)
 	}
 
-	if resp.StatusCode > 299 {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("response failed with status code: %d and body: %s", resp.StatusCode, string(body))
 	}
 
