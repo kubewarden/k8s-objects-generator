@@ -56,7 +56,7 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 	slog.Info("Created `go.mod`", "path", goModFileName)
 
 	swaggerFileName := p.SwaggerFile()
-	if err := os.WriteFile(swaggerFileName, swaggerData, 0o600); err != nil {
+	if err = os.WriteFile(swaggerFileName, swaggerData, 0o600); err != nil {
 		return errors.Wrapf(err, "cannot write swagger file inside of project root: %s", swaggerFileName)
 	}
 

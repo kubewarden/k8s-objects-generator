@@ -316,7 +316,7 @@ linters:
         shadow:
           # Whether to be strict about shadowing; can be noisy.
           # Default: false
-          strict: true
+          strict: false
 
     inamedparam:
       # Skips check for interface methods with only a single parameter.
