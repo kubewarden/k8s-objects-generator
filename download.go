@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/blang/semver/v4"
@@ -27,7 +27,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 		"https://github.com/kubernetes/kubernetes/raw/v%d.%d.%d/api/openapi-spec/swagger.json",
 		version.Major, version.Minor, version.Patch)
 
-	log.Printf("Downloading swagger file for Kubernetes %s from %s", version.String(), downloadURL)
+	slog.Info("Downloading swagger file for Kubernetes", "version", version.String(), "downloadURL", downloadURL)
 
 	resp, err := http.Get(downloadURL) //nolint:gosec,noctx // let's keep the code simple, we just do 1 request..
 	if err != nil {
@@ -35,7 +35,7 @@ func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 	}
 	defer func() {
 		if cerr := resp.Body.Close(); cerr != nil {
-			log.Printf("failed to close response body: %v", cerr)
+			slog.Info("failed to close response body", "error", cerr)
 		}
 	}()
 

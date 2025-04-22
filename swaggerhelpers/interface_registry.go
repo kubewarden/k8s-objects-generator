@@ -2,6 +2,7 @@ package swaggerhelpers
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -48,6 +49,6 @@ func (r *InterfaceRegistry) IsInterface(gitRepo, module, name string) bool {
 
 func (r *InterfaceRegistry) Dump() {
 	for module, interfaces := range r.interfacesByModule {
-		fmt.Printf("interfaces for module %s: %+v\n", module, interfaces)
+		slog.Info("interfaces for module", "module", module, "interfaces", interfaces)
 	}
 }

@@ -2,6 +2,7 @@ package split
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -42,7 +43,7 @@ func (s *Splitter) GenerateSwaggerFiles(project Project, plan *RefactoringPlan) 
 	}
 
 	for pkgName, jsonData := range swaggerFiles {
-		fmt.Printf("Generating models for package %s\n", pkgName)
+		slog.Info("Generating models for package", "package", pkgName)
 
 		pathToSwagger := filepath.Join(project.OutputDir,
 			"src",

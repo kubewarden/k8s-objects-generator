@@ -3,7 +3,7 @@ package split
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,8 +57,8 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 	var lastGVK *groupVersionResource
 	var gvkCount int
 	for _, pkg := range plan.Packages {
-		log.Println("============================================================================")
-		log.Println("Generating GVK files for module", pkg.Name)
+		slog.Info("============================================================================")
+		slog.Info("Generating GVK files for module", "module", pkg.Name)
 		for _, dfn := range pkg.Definitions {
 			if gvk := groupKindResource(dfn); gvk != nil {
 				gvkCount++
@@ -76,8 +76,8 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 				return err
 			}
 
-			log.Printf("Generated GVK files (visited %d/%d)", gvkCount, len(pkg.Definitions))
-			log.Println("Generated group_info.go file")
+			slog.Info("Generated GVK files", "visited", gvkCount, "total", len(pkg.Definitions))
+			slog.Info("Generated group_info.go file")
 			lastGVK, gvkCount = nil, 0
 		}
 	}
@@ -93,7 +93,7 @@ func (g *groupResource) generateResourceFile(path string, templ *template.Templa
 
 	defer func() {
 		if cerr := gvkFile.Close(); cerr != nil {
-			log.Printf("failed to close file %s: %v", path, cerr)
+			slog.Error("failed to close file %s: %v", "path", path, "error", cerr)
 		}
 	}()
 
@@ -112,7 +112,7 @@ func groupKindResource(definition *swaggerhelpers.Definition) *groupVersionResou
 
 	kubeExtension, isKubeExtension := asKubernetesExtension(extension)
 	if !isKubeExtension {
-		log.Printf("GVK specific %s key format for %s package definition is not found. Skipping...", kubernetesGroupVersionKindKey, definition.PackageName)
+		slog.Info("GVK specific key format for package definition is not found. Skipping...", "GVK", kubernetesGroupVersionKindKey, "package", definition.PackageName)
 		return nil
 	}
 
@@ -124,8 +124,8 @@ func groupKindResource(definition *swaggerhelpers.Definition) *groupVersionResou
 }
 
 func (g *groupResource) copyStaticFiles(targetRoot string) error {
-	log.Println("============================================================================")
-	log.Println("Generating static content files")
+	slog.Info("============================================================================")
+	slog.Info("Generating static content files")
 	err := fs.WalkDir(object_templates.ApimachineryRoot, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -148,10 +148,10 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 		if err != nil {
 			return err
 		}
-		log.Println("File", filepath.Base(path), "copied into the", filepath.Dir(targetFilePath))
+		slog.Info("File copied", "File", filepath.Base(path), "destination", filepath.Dir(targetFilePath))
 		defer func() {
 			if cerr := targetFile.Close(); cerr != nil {
-				log.Printf("failed to close file %s: %v", path, cerr)
+				slog.Error("failed to close file", "path", path, "error", cerr)
 			}
 		}()
 		if _, err = targetFile.Write(sourceBuf); err != nil {
@@ -160,7 +160,7 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 
 		return nil
 	})
-	log.Println("============================================================================")
+	slog.Info("============================================================================")
 
 	return err
 }
