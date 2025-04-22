@@ -467,3 +467,8 @@ linters:
           - noctx
           - wrapcheck
           - gocognit # some tests are complex
+      - path: "object_templates/"
+        linters:
+          - godot
+          - mnd
+          - nonamedreturns
