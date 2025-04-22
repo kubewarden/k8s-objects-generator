@@ -66,6 +66,7 @@ func patchDefinition(definition *openapi_spec.Schema, id string) {
 	}
 }
 
+//nolint:gocognit // keep cognitive complexity as it is, this function is quite contained
 func (d *Definition) computeDependencies() error {
 	var propImports []PropertyImport
 

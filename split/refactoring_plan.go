@@ -60,40 +60,39 @@ func (r *RefactoringPlan) DependenciesGraph() (*dag.DAG, error) {
 	dependenciesGraph := dag.NewDAG()
 
 	for pkgName, pkg := range r.Packages {
-		if _, err := dependenciesGraph.GetVertex(pkgName); err != nil {
-			// the package is not yet known by the DAG
-			err := dependenciesGraph.AddVertexByID(pkgName, pkgName)
-			if err != nil {
-				return nil, err
-			}
+		if err := addVertexIfNotExists(dependenciesGraph, pkgName); err != nil {
+			return nil, err
 		}
 
 		for name := range pkg.Dependencies.Iterator().C {
-			// ensure the dependency is known by the DAG
-			if _, err := dependenciesGraph.GetVertex(name); err != nil {
-				_, found := r.Packages[name]
-				if !found {
-					return nil, fmt.Errorf("unsolved dependency: cannot find package %s inside of list of known packages", name)
-				}
-
-				// the package is not yet known by the DAG
-				err := dependenciesGraph.AddVertexByID(name, name)
-				if err != nil {
-					return nil, err
-				}
+			if err := ensureDependencyExists(dependenciesGraph, name, r.Packages); err != nil {
+				return nil, err
 			}
 
-			// register the dependency relation
-			// this namespace depends on `depName`
 			if err := dependenciesGraph.AddEdge(name, pkgName); err != nil {
-				return nil, errors.Wrapf(err,
-					"Cannot register the dependency relation that %s has against %s",
-					pkgName, name)
+				return nil, err
 			}
 		}
 	}
 
 	return dependenciesGraph, nil
+}
+
+func addVertexIfNotExists(graph *dag.DAG, vertexID string) error {
+	if _, err := graph.GetVertex(vertexID); err != nil {
+		return graph.AddVertexByID(vertexID, vertexID)
+	}
+	return nil
+}
+
+func ensureDependencyExists(graph *dag.DAG, dependency string, packages map[string]swaggerhelpers.Package) error {
+	if _, err := graph.GetVertex(dependency); err != nil {
+		if _, found := packages[dependency]; !found {
+			return fmt.Errorf("unsolved dependency: cannot find package %s inside of list of known packages", dependency)
+		}
+		return graph.AddVertexByID(dependency, dependency)
+	}
+	return nil
 }
 
 func (r *RefactoringPlan) RenderNewSwaggerFiles(githubRepo string) (map[string]string, error) {
