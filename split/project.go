@@ -3,7 +3,7 @@ package split
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/kubewarden/k8s-objects-generator/common"
 	"github.com/kubewarden/k8s-objects-generator/object_templates"
 )
 
@@ -44,7 +45,7 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 		return errors.Wrapf(err, "cannot cleanup dir %s", p.Root)
 	}
 
-	if err = os.MkdirAll(p.Root, os.ModePerm); err != nil {
+	if err = os.MkdirAll(p.Root, 0o750); err != nil {
 		return errors.Wrapf(err, "cannot create dir %s", p.Root)
 	}
 
@@ -52,33 +53,33 @@ func (p *Project) Init(swaggerData []byte, kubernetesVersion, license string) er
 	if err = goModInit(goModFileName, p.GitRepo); err != nil {
 		return errors.Wrapf(err, "cannot create go.mod file %s", goModFileName)
 	}
-	log.Printf("Created `go.mod` under %s", goModFileName)
+	slog.Info("Created `go.mod`", "path", goModFileName)
 
 	swaggerFileName := p.SwaggerFile()
-	if err := os.WriteFile(swaggerFileName, swaggerData, 0644); err != nil {
+	if err = os.WriteFile(swaggerFileName, swaggerData, 0o600); err != nil {
 		return errors.Wrapf(err, "cannot write swagger file inside of project root: %s", swaggerFileName)
 	}
 
 	kubernetesVersionFile := filepath.Join(p.Root, "KUBERNETES_VERSION")
-	err = os.WriteFile(kubernetesVersionFile, []byte(kubernetesVersion), 0644)
+	err = os.WriteFile(kubernetesVersionFile, []byte(kubernetesVersion), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write KUBERNETES_VERSION file %s", kubernetesVersionFile)
 	}
 
 	licenseFile := filepath.Join(p.Root, "LICENSE")
-	err = os.WriteFile(licenseFile, []byte(license), 0644)
+	err = os.WriteFile(licenseFile, []byte(license), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write LICENSE file %s", licenseFile)
 	}
 
 	readmeFile := filepath.Join(p.Root, "README.md")
-	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0644)
+	err = os.WriteFile(readmeFile, []byte(object_templates.Readme), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write README.md file %s", readmeFile)
 	}
 
 	gitignoreFile := filepath.Join(p.Root, ".gitignore")
-	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0644)
+	err = os.WriteFile(gitignoreFile, []byte(object_templates.GitIgnore), 0o600)
 	if err != nil {
 		return errors.Wrapf(err, "cannot write .gitignore file %s", licenseFile)
 	}
@@ -153,7 +154,7 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 	cmdName := "swagger"
 
 	packageNameChunks := strings.Split(packageName, "/")
-	if len(packageNameChunks) < 2 {
+	if len(packageNameChunks) < common.ChunkNumber {
 		return fmt.Errorf("package name %s doesn't have enough chunks", packageName)
 	}
 
@@ -211,9 +212,9 @@ func runCmd(cmdName string, args []string, extraEnv map[string]string, dir strin
 
 	err := cmd.Run()
 	if err != nil {
-		log.Printf("CMD: %+v", cmd)
-		log.Printf("STDOUT: %s", stdout.String())
-		log.Printf("STDERR: %s", stderr.String())
+		slog.Info("CMD output", "string", cmd)
+		slog.Info("STDOUT output", "string", stdout.String())
+		slog.Info("STDERR output", "string", stderr.String())
 	}
 	return err
 }

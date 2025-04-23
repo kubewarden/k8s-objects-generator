@@ -8,6 +8,7 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //go:embed testdata/event_gvk.go.gold
@@ -18,12 +19,12 @@ var groupInfoGold string
 
 func TestKubernetesExtensionParse(t *testing.T) {
 	tests := []struct {
-		extensionJson   string
+		extensionJSON   string
 		extensionParsed bool
 		expectedGVK     *groupVersionResource
 	}{
 		{
-			extensionJson: `{"x-kubernetes-group-version-kind": [
+			extensionJSON: `{"x-kubernetes-group-version-kind": [
         						{
           							"group": "events.k8s.io",
 									"kind": "Event",
@@ -38,7 +39,7 @@ func TestKubernetesExtensionParse(t *testing.T) {
 			},
 		},
 		{
-			extensionJson: `{"x-kubernetes-group-version-kind": [
+			extensionJSON: `{"x-kubernetes-group-version-kind": [
         						{
           							"group": "",
           							"kind": "DeleteOptions",
@@ -56,7 +57,7 @@ func TestKubernetesExtensionParse(t *testing.T) {
 
 	for _, tt := range tests {
 		extension := spec.VendorExtensible{}
-		assert.NoError(t, extension.UnmarshalJSON([]byte(tt.extensionJson)))
+		require.NoError(t, extension.UnmarshalJSON([]byte(tt.extensionJSON)))
 		kubeExtension, isKubeExtension := asKubernetesExtension(extension.Extensions)
 		assert.Equal(t, isKubeExtension, tt.extensionParsed)
 		if tt.extensionParsed {
@@ -70,22 +71,22 @@ func TestKubernetesExtensionParse(t *testing.T) {
 func TestGenerateGroupResources(t *testing.T) {
 	outputDir := "/testout"
 	project, err := NewProject(outputDir, "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	splitter, err := NewSplitter(filepath.Join("testdata", "test-swagger.json"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	refactoringPlan, err := splitter.ComputeRefactoringPlan()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	fs := afero.NewMemMapFs()
 	groupResource := NewGroupResource(fs)
-	assert.NoError(t, groupResource.Generate(project, refactoringPlan))
+	require.NoError(t, groupResource.Generate(project, refactoringPlan))
 
 	eventGvk, err := afero.ReadFile(fs, filepath.Join(outputDir, "src/api/events/v1/event_gvk.go"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	groupInfo, err := afero.ReadFile(fs, filepath.Join(outputDir, "src/api/events/v1/group_info.go"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, eventGvkGold, string(eventGvk))
 	assert.Equal(t, groupInfoGold, string(groupInfo))

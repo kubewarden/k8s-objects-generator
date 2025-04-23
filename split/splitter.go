@@ -2,6 +2,7 @@ package split
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -9,8 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Takes care of splitting the single big swagger file of Kubernetes
-// into smaller ones, one package
+// Splitter takes care of splitting the single big swagger file of Kubernetes
+// into smaller ones, one package.
 type Splitter struct {
 	vanillaSwagger openapi_spec.Swagger
 }
@@ -42,23 +43,23 @@ func (s *Splitter) GenerateSwaggerFiles(project Project, plan *RefactoringPlan) 
 	}
 
 	for pkgName, jsonData := range swaggerFiles {
-		fmt.Printf("Generating models for package %s\n", pkgName)
+		slog.Info("Generating models for package", "package", pkgName)
 
 		pathToSwagger := filepath.Join(project.OutputDir,
 			"src",
 			project.GitRepo,
 			pkgName)
-		if err := os.MkdirAll(pathToSwagger, 0777); err != nil {
+		if err := os.MkdirAll(pathToSwagger, 0o750); err != nil {
 			return errors.Wrapf(err, "cannot create directory %s", pathToSwagger)
 		}
 
 		fileName := filepath.Join(pathToSwagger, "swagger.json")
-		if err := os.WriteFile(fileName, []byte(jsonData), 0644); err != nil {
+		if err := os.WriteFile(fileName, []byte(jsonData), 0o600); err != nil {
 			return errors.Wrapf(err, "cannot write %s", fileName)
 		}
 
 		if err := project.InvokeSwaggerModelGenerator(pkgName); err != nil {
-			return fmt.Errorf("swagger execution failed for module %s: %+v", pkgName, err)
+			return fmt.Errorf("swagger execution failed for module %s: %+w", pkgName, err)
 		}
 	}
 

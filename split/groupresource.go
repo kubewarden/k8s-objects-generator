@@ -3,7 +3,7 @@ package split
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/afero"
 
 	"github.com/kubewarden/k8s-objects-generator/object_templates"
-	"github.com/kubewarden/k8s-objects-generator/swagger_helpers"
+	"github.com/kubewarden/k8s-objects-generator/swaggerhelpers"
 )
 
 const (
@@ -57,8 +57,8 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 	var lastGVK *groupVersionResource
 	var gvkCount int
 	for _, pkg := range plan.Packages {
-		log.Println("============================================================================")
-		log.Println("Generating GVK files for module", pkg.Name)
+		slog.Info("============================================================================")
+		slog.Info("Generating GVK files for module", "module", pkg.Name)
 		for _, dfn := range pkg.Definitions {
 			if gvk := groupKindResource(dfn); gvk != nil {
 				gvkCount++
@@ -76,8 +76,8 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 				return err
 			}
 
-			log.Printf("Generated GVK files (visited %d/%d)", gvkCount, len(pkg.Definitions))
-			log.Println("Generated group_info.go file")
+			slog.Info("Generated GVK files", "visited", gvkCount, "total", len(pkg.Definitions))
+			slog.Info("Generated group_info.go file")
 			lastGVK, gvkCount = nil, 0
 		}
 	}
@@ -86,20 +86,25 @@ func (g *groupResource) Generate(project Project, plan *RefactoringPlan) error {
 }
 
 func (g *groupResource) generateResourceFile(path string, templ *template.Template, gvk *groupVersionResource) error {
-	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0644)
+	gvkFile, err := g.fs.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:mnd // mnd doesn't support file octals yet
 	if err != nil {
 		return err
 	}
-	defer gvkFile.Close()
+
+	defer func() {
+		if cerr := gvkFile.Close(); cerr != nil {
+			slog.Error("failed to close file %s: %v", "path", path, "error", cerr)
+		}
+	}()
 
 	if err := templ.Execute(gvkFile, gvk); err != nil {
-		return fmt.Errorf("failed to process template for %s: %v", gvk.String(), err)
+		return fmt.Errorf("failed to process template for %s: %w", gvk.String(), err)
 	}
 
 	return nil
 }
 
-func groupKindResource(definition *swagger_helpers.Definition) *groupVersionResource {
+func groupKindResource(definition *swaggerhelpers.Definition) *groupVersionResource {
 	extension := definition.SwaggerDefinition.Extensions
 	if extension == nil || extension[kubernetesGroupVersionKindKey] == nil {
 		return nil
@@ -107,7 +112,7 @@ func groupKindResource(definition *swagger_helpers.Definition) *groupVersionReso
 
 	kubeExtension, isKubeExtension := asKubernetesExtension(extension)
 	if !isKubeExtension {
-		log.Printf("GVK specific %s key format for %s package definition is not found. Skipping...", kubernetesGroupVersionKindKey, definition.PackageName)
+		slog.Info("GVK specific key format for package definition is not found. Skipping...", "GVK", kubernetesGroupVersionKindKey, "package", definition.PackageName)
 		return nil
 	}
 
@@ -119,8 +124,8 @@ func groupKindResource(definition *swagger_helpers.Definition) *groupVersionReso
 }
 
 func (g *groupResource) copyStaticFiles(targetRoot string) error {
-	log.Println("============================================================================")
-	log.Println("Generating static content files")
+	slog.Info("============================================================================")
+	slog.Info("Generating static content files")
 	err := fs.WalkDir(object_templates.ApimachineryRoot, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -139,19 +144,23 @@ func (g *groupResource) copyStaticFiles(targetRoot string) error {
 			return nil
 		}
 		targetFilePath := filepath.Join(targetRoot, path)
-		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0644)
+		targetFile, err := g.fs.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR, 0o600) //nolint:mnd // mnd doesn't support file octals yet
 		if err != nil {
 			return err
 		}
-		log.Println("File", filepath.Base(path), "copied into the", filepath.Dir(targetFilePath))
-		defer targetFile.Close()
+		slog.Info("File copied", "File", filepath.Base(path), "destination", filepath.Dir(targetFilePath))
+		defer func() {
+			if cerr := targetFile.Close(); cerr != nil {
+				slog.Error("failed to close file", "path", path, "error", cerr)
+			}
+		}()
 		if _, err = targetFile.Write(sourceBuf); err != nil {
 			return err
 		}
 
 		return nil
 	})
-	log.Println("============================================================================")
+	slog.Info("============================================================================")
 
 	return err
 }

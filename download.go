@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/blang/semver/v4"
@@ -15,32 +15,37 @@ type SwaggerData struct {
 	KubernetesVersion string
 }
 
-// Downloads the swagger file for the Kubernetes version specified by the user
+// DownloadSwagger downloads the swagger file for the Kubernetes version
+// specified by the user.
 func DownloadSwagger(kubeVersion string) (*SwaggerData, error) {
 	version, err := semver.ParseTolerant(kubeVersion)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot parse kubernetes version %s", kubeVersion)
 	}
 
-	downloadUrl := fmt.Sprintf(
+	downloadURL := fmt.Sprintf(
 		"https://github.com/kubernetes/kubernetes/raw/v%d.%d.%d/api/openapi-spec/swagger.json",
 		version.Major, version.Minor, version.Patch)
 
-	log.Printf("Downloading swagger file for Kubernetes %s from %s", version.String(), downloadUrl)
+	slog.Info("Downloading swagger file for Kubernetes", "version", version.String(), "downloadURL", downloadURL)
 
-	resp, err := http.Get(downloadUrl)
+	resp, err := http.Get(downloadURL) //nolint:gosec,noctx // let's keep the code simple, we just do 1 request..
 	if err != nil {
-		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadUrl)
+		return nil, errors.Wrapf(err, "Cannot fetch swagger file from %s", downloadURL)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			slog.Info("failed to close response body", "error", cerr)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Cannot read contents of response from %s", downloadUrl)
+		return nil, errors.Wrapf(err, "Cannot read contents of response from %s", downloadURL)
 	}
 
-	if resp.StatusCode > 299 {
-		return nil, fmt.Errorf("Response failed with status code: %d and body: %s", resp.StatusCode, string(body))
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("response failed with status code: %d and body: %s", resp.StatusCode, string(body))
 	}
 
 	return &SwaggerData{

@@ -12,15 +12,15 @@ func TestNewRefactoringPlan(t *testing.T) {
 	kubernetesVersion := "1.23"
 
 	swagger := openapi_spec.Swagger{}
-	swagger.SwaggerProps.Swagger = swaggerVersion
+	swagger.Swagger = swaggerVersion
 
 	paths := openapi_spec.Paths{}
-	swagger.SwaggerProps.Paths = &paths
+	swagger.Paths = &paths
 
 	info := openapi_spec.Info{}
-	info.InfoProps.Title = "kubernetes"
-	info.InfoProps.Version = kubernetesVersion
-	swagger.SwaggerProps.Info = &info
+	info.Title = "kubernetes"
+	info.Version = kubernetesVersion
+	swagger.Info = &info
 	swagger.Definitions = make(openapi_spec.Definitions)
 
 	// First definition
