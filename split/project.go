@@ -2,6 +2,7 @@ package split
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -196,7 +197,7 @@ func (p *Project) InvokeSwaggerModelGenerator(packageName string) error {
 }
 
 func runCmd(cmdName string, args []string, extraEnv map[string]string, dir string) error {
-	cmd := exec.Command(cmdName, args...)
+	cmd := exec.CommandContext(context.Background(), cmdName, args...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
