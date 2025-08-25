@@ -2,7 +2,7 @@ module github.com/kubewarden/k8s-objects-generator
 
 go 1.23.0
 
-toolchain go1.24.6
+toolchain go1.25.0
 
 require (
 	github.com/blang/semver/v4 v4.0.0
@@ -12,7 +12,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.14.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 )
 
 require (
