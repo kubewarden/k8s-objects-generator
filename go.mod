@@ -2,7 +2,7 @@ module github.com/kubewarden/k8s-objects-generator
 
 go 1.24.0
 
-toolchain go1.25.4
+toolchain go1.25.5
 
 require (
 	github.com/blang/semver/v4 v4.0.0
