@@ -28,6 +28,8 @@ github.com/go-openapi/spec v0.22.1 h1:beZMa5AVQzRspNjvhe5aG1/XyBSMeX1eEOs7dMoXh/
 github.com/go-openapi/spec v0.22.1/go.mod h1:c7aeIQT175dVowfp7FeCvXXnjN/MrpaONStibD2WtDA=
 github.com/go-openapi/spec v0.22.2 h1:KEU4Fb+Lp1qg0V4MxrSCPv403ZjBl8Lx1a83gIPU8Qc=
 github.com/go-openapi/spec v0.22.2/go.mod h1:iIImLODL2loCh3Vnox8TY2YWYJZjMAKYyLH2Mu8lOZs=
+github.com/go-openapi/spec v0.22.3 h1:qRSmj6Smz2rEBxMnLRBMeBWxbbOvuOoElvSvObIgwQc=
+github.com/go-openapi/spec v0.22.3/go.mod h1:iIImLODL2loCh3Vnox8TY2YWYJZjMAKYyLH2Mu8lOZs=
 github.com/go-openapi/swag v0.23.0 h1:vsEVJDUo2hPJ2tu0/Xc+4noaxyEffXNIs3cOULZ+GrE=
 github.com/go-openapi/swag v0.23.0/go.mod h1:esZ8ITTYEsH1V2trKHjAN8Ai7xHb8RV+YSZ577vPjgQ=
 github.com/go-openapi/swag/conv v0.25.1 h1:+9o8YUg6QuqqBM5X6rYL/p1dpWeZRhoIt9x7CCP+he0=

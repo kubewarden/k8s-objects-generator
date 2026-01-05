@@ -7,7 +7,7 @@ toolchain go1.25.5
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/deckarep/golang-set/v2 v2.8.0
-	github.com/go-openapi/spec v0.22.2
+	github.com/go-openapi/spec v0.22.3
 	github.com/heimdalr/dag v1.5.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pkg/errors v0.9.1
