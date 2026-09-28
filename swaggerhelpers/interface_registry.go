@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"strings"
 
-	mapset "github.com/deckarep/golang-set/v2"
+	mapset "github.com/deckarep/golang-set/v3"
 )
 
 // InterfaceRegistry keeps track of all the `interface` objects that are
