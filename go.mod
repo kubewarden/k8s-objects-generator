@@ -6,7 +6,7 @@ toolchain go1.27.1
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/deckarep/golang-set/v2 v2.9.0
+	github.com/deckarep/golang-set/v3 v3.0.0
 	github.com/go-openapi/spec v1.0.1
 	github.com/heimdalr/dag v1.5.1
 	github.com/iancoleman/strcase v0.3.0
@@ -27,7 +27,6 @@ require (
 	github.com/go-openapi/swag/typeutils v0.29.1 // indirect
 	github.com/go-openapi/swag/yamlutils v0.29.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	go.mongodb.org/mongo-driver v1.17.7 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/text v0.28.0 // indirect
 )

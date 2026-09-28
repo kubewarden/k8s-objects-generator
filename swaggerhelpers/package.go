@@ -1,7 +1,7 @@
 package swaggerhelpers
 
 import (
-	mapset "github.com/deckarep/golang-set/v2"
+	mapset "github.com/deckarep/golang-set/v3"
 	openapi_spec "github.com/go-openapi/spec"
 	"github.com/pkg/errors"
 )
